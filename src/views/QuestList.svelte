@@ -2,11 +2,10 @@
   import type ResearchQuest from "../index";
   import type { Quest } from "../services/storage";
   import { onMount } from "svelte";
-  import refreshQuests, {
-    extractContext,
-    generateContextHash,
-  } from "../lib/generateNewQuests.js";
+  import refreshQuests from "../lib/refreshQuests.js";
   import { Notice } from "obsidian";
+  import { extractContext } from "../lib/extractContext";
+  import { generateContextHash } from "../lib/generateContextHash";
 
   export let plugin: ResearchQuest;
 
