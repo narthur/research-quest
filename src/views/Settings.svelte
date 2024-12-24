@@ -18,8 +18,14 @@
   async function clearData() {
     const modal = new ClearConfirmModal(app, (shouldClear) => {
       if (!shouldClear) return;
-      await app.plugin.storage.saveQuests([]);
-      new Notice("Research quests cleared");
+      plugin.storage
+        .saveQuests([])
+        .then(() => {
+          new Notice("Research Quests plugin data cleared");
+        })
+        .catch((e) => {
+          new Notice("Failed to clear Research Quests plugin data");
+        });
     });
     modal.open();
   }
