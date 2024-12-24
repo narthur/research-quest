@@ -7,6 +7,8 @@
   import QuestStats from "./components/QuestStats.svelte";
   import QuestSection from "./components/QuestSection.svelte";
   import QuestHeader from "./components/QuestHeader.svelte";
+  import { extractContext } from "../lib/extractContext";
+  import { generateContextHash } from "../lib/generateContextHash";
 
   export let plugin: ResearchQuest;
 
