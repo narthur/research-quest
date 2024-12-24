@@ -1,5 +1,5 @@
 import { Plugin, WorkspaceLeaf } from "obsidian";
-import { ExampleView, VIEW_TYPE_EXAMPLE } from "./views/ExampleView.js";
+import { QuestList, VIEW_TYPE_QUEST_LIST } from "./views/QuestList.js";
 import { Settings } from "./views/Settings.js";
 import { OpenAIService, createOpenAIService } from "./services/openai";
 
@@ -20,7 +20,7 @@ export default class ResearchQuest extends Plugin {
 
     this.addSettingTab(new Settings(this.app, this));
 
-    this.registerView(VIEW_TYPE_EXAMPLE, (leaf) => new ExampleView(leaf));
+    this.registerView(VIEW_TYPE_QUEST_LIST, (leaf) => new QuestList(leaf));
 
     this.addRibbonIcon("sparkles", "Activate view", () => {
       this.activateView();
@@ -49,7 +49,7 @@ export default class ResearchQuest extends Plugin {
     const { workspace } = this.app;
 
     let leaf: WorkspaceLeaf | null = null;
-    const leaves = workspace.getLeavesOfType(VIEW_TYPE_EXAMPLE);
+    const leaves = workspace.getLeavesOfType(VIEW_TYPE_QUEST_LIST);
 
     if (leaves.length > 0) {
       // A leaf with our view already exists, use that
@@ -58,7 +58,7 @@ export default class ResearchQuest extends Plugin {
       // Our view could not be found in the workspace, create a new leaf
       // in the right sidebar for it
       leaf = workspace.getRightLeaf(false);
-      await leaf?.setViewState({ type: VIEW_TYPE_EXAMPLE, active: true });
+      await leaf?.setViewState({ type: VIEW_TYPE_QUEST_LIST, active: true });
     }
 
     // "Reveal" the leaf in case it is in a collapsed sidebar

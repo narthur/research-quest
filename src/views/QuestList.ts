@@ -1,22 +1,22 @@
 import { ItemView, WorkspaceLeaf } from "obsidian";
 
-import Component from "../Component.svelte";
+import QuestListComponent from "./QuestList.svelte";
 
-export const VIEW_TYPE_EXAMPLE = "example-view";
+export const VIEW_TYPE_QUEST_LIST = "quest-list-view";
 
-export class ExampleView extends ItemView {
-  component: Component | undefined;
+export class QuestList extends ItemView {
+  component: QuestListComponent | undefined;
 
   constructor(leaf: WorkspaceLeaf) {
     super(leaf);
   }
 
   getViewType() {
-    return VIEW_TYPE_EXAMPLE;
+    return VIEW_TYPE_QUEST_LIST;
   }
 
   getDisplayText() {
-    return "Example view";
+    return "Quest List";
   }
 
   async onOpen() {
@@ -24,7 +24,7 @@ export class ExampleView extends ItemView {
       variable: 1,
     };
 
-    this.component = new Component({
+    this.component = new QuestListComponent({
       target: this.contentEl,
       props,
     });
