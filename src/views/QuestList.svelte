@@ -2,10 +2,10 @@
   import type ResearchQuest from "../index";
   import type { Quest } from "../services/storage";
   import { onMount } from "svelte";
-  import generateNewQuests, {
+  import refreshQuests, {
     extractContext,
     generateContextHash,
-  } from "../generateNewQuests.js";
+  } from "../lib/generateNewQuests.js";
   import { Notice } from "obsidian";
 
   export let plugin: ResearchQuest;
@@ -25,7 +25,7 @@
 
   function handleRefresh() {
     isLoading = true;
-    generateNewQuests(plugin).finally(() => {
+    refreshQuests(plugin).finally(() => {
       loadQuests();
       isLoading = false;
     });

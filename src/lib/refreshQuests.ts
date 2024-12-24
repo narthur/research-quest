@@ -1,52 +1,10 @@
-import type ResearchQuest from ".";
-import type { Quest } from "./services/storage";
-import { createHash } from "crypto";
+import type ResearchQuest from "..";
+import type { Quest } from "../services/storage";
+import { extractContext } from "./extractContext";
+import { generateContextHash } from "./generateContextHash";
+import { validateQuestions } from "./validateQuestions";
 
-export function generateContextHash(text: string): string {
-  return createHash("sha256").update(text).digest("hex");
-}
-
-export function extractContext(
-  text: string,
-  question: string,
-  contextSize: number = 500
-): string {
-  // Find the most relevant section of text for this question
-  // This is a simple implementation - could be enhanced with AI
-  const words = text.split(/\s+/);
-  if (words.length <= contextSize) return text;
-
-  // Take a window of words around the middle of the text
-  const start = Math.max(0, Math.floor(words.length / 2) - contextSize / 2);
-  const end = Math.min(words.length, start + contextSize);
-  return words.slice(start, end).join(" ");
-}
-
-async function validateQuestions(
-  plugin: ResearchQuest,
-  quests: Quest[],
-  fileContent: string
-): Promise<Quest[]> {
-  const currentHash = generateContextHash(fileContent);
-
-  return quests.map((quest) => {
-    if (!quest.contextHash || !quest.contextSnapshot) return quest;
-
-    // Mark as obsolete if hash has changed and content is significantly different
-    if (quest.contextHash !== currentHash) {
-      return {
-        ...quest,
-        isObsolete: true,
-        lastValidated: Date.now(),
-        obsoleteReason: "Document content has changed significantly",
-      };
-    }
-
-    return quest;
-  });
-}
-
-export default async function generateNewQuests(plugin: ResearchQuest) {
+export default async function refreshQuests(plugin: ResearchQuest) {
   if (!plugin.openai) {
     console.error("OpenAI API key not configured");
     return;

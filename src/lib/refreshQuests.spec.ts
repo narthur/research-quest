@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import generateNewQuests from "../generateNewQuests";
+import refreshQuests from "./refreshQuests";
 import type { Quest } from "../services/storage";
 
-describe("generateNewQuests", () => {
+describe("refreshQuests", () => {
   const mockPlugin: any = {
     openai: {
       generateQuestions: vi.fn(),
@@ -32,13 +32,13 @@ describe("generateNewQuests", () => {
 
   it("should not generate questions if OpenAI is not configured", async () => {
     const pluginWithoutOpenAI = { ...mockPlugin, openai: undefined };
-    await generateNewQuests(pluginWithoutOpenAI);
+    await refreshQuests(pluginWithoutOpenAI);
     expect(mockPlugin.storage.saveQuests).not.toHaveBeenCalled();
   });
 
   it("should not generate questions if no active file", async () => {
     mockPlugin.app.workspace.getActiveFile.mockReturnValue(null);
-    await generateNewQuests(mockPlugin);
+    await refreshQuests(mockPlugin);
     expect(mockPlugin.storage.saveQuests).not.toHaveBeenCalled();
   });
 
@@ -46,7 +46,7 @@ describe("generateNewQuests", () => {
     const newQuestions = ["Question 1", "Question 2"];
     mockPlugin.openai.generateQuestions.mockResolvedValue(newQuestions);
 
-    await generateNewQuests(mockPlugin);
+    await refreshQuests(mockPlugin);
 
     expect(mockPlugin.openai.generateQuestions).toHaveBeenCalledWith(
       "Test content",
@@ -93,7 +93,7 @@ describe("generateNewQuests", () => {
       ],
     });
 
-    await generateNewQuests(mockPlugin);
+    await refreshQuests(mockPlugin);
 
     expect(mockPlugin.openai.evaluateQuestions).toHaveBeenCalledWith(
       "Test content",
@@ -121,7 +121,7 @@ describe("generateNewQuests", () => {
       new Error("API Error")
     );
 
-    await expect(generateNewQuests(mockPlugin)).resolves.not.toThrow();
+    await expect(refreshQuests(mockPlugin)).resolves.not.toThrow();
     expect(console.error).toHaveBeenCalledWith(
       "Error refreshing quests:",
       expect.any(Error)
@@ -156,13 +156,20 @@ describe("generateNewQuests", () => {
     // Mock that 3 new questions will be generated to get back to 5 active questions
     mockPlugin.openai.generateQuestions
       .mockResolvedValueOnce([]) // First call during initial check (no new questions needed)
-      .mockResolvedValueOnce(["New Question 1", "New Question 2", "New Question 3"]); // Second call after marking complete
+      .mockResolvedValueOnce([
+        "New Question 1",
+        "New Question 2",
+        "New Question 3",
+      ]); // Second call after marking complete
 
-    await generateNewQuests(mockPlugin);
+    await refreshQuests(mockPlugin);
 
     // Verify that new questions were generated after marking complete
-    await generateNewQuests(mockPlugin);
-    expect(mockPlugin.openai.generateQuestions).toHaveBeenLastCalledWith("Test content", 3);
+    await refreshQuests(mockPlugin);
+    expect(mockPlugin.openai.generateQuestions).toHaveBeenLastCalledWith(
+      "Test content",
+      3
+    );
 
     // Verify final state has 5 active questions (2 original + 3 new)
     const savedQuests = mockPlugin.storage.saveQuests.mock.calls.at(-1)[0];
@@ -174,9 +181,18 @@ describe("generateNewQuests", () => {
       expect.arrayContaining([
         expect.objectContaining({ question: "Question 4", isCompleted: false }),
         expect.objectContaining({ question: "Question 5", isCompleted: false }),
-        expect.objectContaining({ question: "New Question 1", isCompleted: false }),
-        expect.objectContaining({ question: "New Question 2", isCompleted: false }),
-        expect.objectContaining({ question: "New Question 3", isCompleted: false }),
+        expect.objectContaining({
+          question: "New Question 1",
+          isCompleted: false,
+        }),
+        expect.objectContaining({
+          question: "New Question 2",
+          isCompleted: false,
+        }),
+        expect.objectContaining({
+          question: "New Question 3",
+          isCompleted: false,
+        }),
       ])
     );
   });
@@ -217,11 +233,12 @@ describe("generateNewQuests", () => {
       ],
     });
 
-    await generateNewQuests(mockPlugin);
+    await refreshQuests(mockPlugin);
 
     // Get the actual questions passed to evaluateQuestions
-    const evaluateCallArgs = mockPlugin.openai.evaluateQuestions.mock.calls[0][1];
-    
+    const evaluateCallArgs =
+      mockPlugin.openai.evaluateQuestions.mock.calls[0][1];
+
     // Verify that only active questions were evaluated
     expect(evaluateCallArgs).toHaveLength(1);
     expect(evaluateCallArgs[0]).toEqual(
@@ -268,11 +285,12 @@ describe("generateNewQuests", () => {
       ],
     });
 
-    await generateNewQuests(mockPlugin);
+    await refreshQuests(mockPlugin);
 
     // Get the actual questions passed to evaluateQuestions
-    const evaluateCallArgs = mockPlugin.openai.evaluateQuestions.mock.calls[0][1];
-    
+    const evaluateCallArgs =
+      mockPlugin.openai.evaluateQuestions.mock.calls[0][1];
+
     // Verify that only active questions were evaluated
     expect(evaluateCallArgs).toHaveLength(1);
     expect(evaluateCallArgs[0]).toEqual(
