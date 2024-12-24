@@ -20,11 +20,13 @@ export class ExampleView extends ItemView {
   }
 
   async onOpen() {
+    const props = {
+      variable: 1,
+    };
+
     this.component = new Component({
       target: this.contentEl,
-      props: {
-        variable: 1,
-      },
+      props,
     });
   }
 
