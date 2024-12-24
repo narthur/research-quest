@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Notice, App } from "obsidian";
   import type ResearchQuest from "../index";
-  import ClearConfirmModal from "./ClearConfirmModal.ts";
+  import ClearConfirmModal from "./ClearConfirmModal.js";
 
   export let app: App;
   export let plugin: ResearchQuest;

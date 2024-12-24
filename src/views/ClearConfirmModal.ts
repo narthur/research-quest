@@ -1,4 +1,4 @@
-import { App, Modal, Notice, Setting } from "obsidian";
+import { App, Modal, Setting } from "obsidian";
 
 export default class ClearConfirmModal extends Modal {
   constructor(app: App, onSubmit: (shouldClear: boolean) => void) {
