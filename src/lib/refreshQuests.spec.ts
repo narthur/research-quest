@@ -1,6 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import refreshQuests from "./refreshQuests";
 import type { Quest } from "../services/storage";
+import { validateQuestions } from "./validateQuestions";
+
+vi.mock("./validateQuestions");
+
+// Mock validateQuestions for all tests
+beforeEach(() => {
+  vi.mocked(validateQuestions).mockImplementation(async (_, quests) => quests);
+});
 
 describe("refreshQuests", () => {
   const mockPlugin: any = {
@@ -142,6 +150,8 @@ describe("refreshQuests", () => {
 
     mockPlugin.storage.getQuests.mockResolvedValue(existingQuests);
 
+    vi.mocked(validateQuestions).mockResolvedValue(existingQuests);
+
     // Mock that 3 questions are now complete
     mockPlugin.openai.evaluateQuestions.mockResolvedValue({
       evaluations: [
@@ -154,25 +164,29 @@ describe("refreshQuests", () => {
     });
 
     // Mock that 3 new questions will be generated to get back to 5 active questions
-    mockPlugin.openai.generateQuestions
-      .mockResolvedValueOnce([]) // First call during initial check (no new questions needed)
-      .mockResolvedValueOnce([
-        "New Question 1",
-        "New Question 2",
-        "New Question 3",
-      ]); // Second call after marking complete
+    mockPlugin.openai.generateQuestions.mockResolvedValue([
+      "New Question 1",
+      "New Question 2",
+      "New Question 3",
+    ]); // Generate new questions to replace completed ones
+
+    // Mock extractContext to return immediately
+    vi.mock("./extractContext", () => ({
+      extractContext: vi.fn().mockResolvedValue("mocked context")
+    }));
 
     await refreshQuests(mockPlugin);
 
-    // Verify that new questions were generated after marking complete
-    await refreshQuests(mockPlugin);
-    expect(mockPlugin.openai.generateQuestions).toHaveBeenLastCalledWith(
+    // Verify that new questions were generated
+    expect(mockPlugin.openai.generateQuestions).toHaveBeenCalledWith(
       "Test content",
       3
     );
 
     // Verify final state has 5 active questions (2 original + 3 new)
-    const savedQuests = mockPlugin.storage.saveQuests.mock.calls.at(-1)[0];
+    expect(mockPlugin.storage.saveQuests).toHaveBeenCalled();
+    const saveQuestsCalls = mockPlugin.storage.saveQuests.mock.calls;
+    const savedQuests = saveQuestsCalls[saveQuestsCalls.length - 1][0];
     const activeQuests = savedQuests.filter((q: Quest) => !q.isCompleted);
     expect(activeQuests).toHaveLength(5);
 

@@ -16,7 +16,14 @@ interface ResearchQuestSettings {
 export const DEFAULT_SETTINGS: Omit<ResearchQuestSettings, "OPENAI_API_KEY"> = {
   MODEL: "gpt-4",
   GENERATE_PROMPT:
-    "You are a research assistant helping to generate focused research questions.",
+    `You are a research assistant helping to generate focused research questions. Consider:
+1. Look for gaps in current understanding
+2. Identify areas that need deeper exploration
+3. Focus on questions that build on existing knowledge
+4. Prioritize questions that connect different concepts
+5. Consider methodological or analytical questions
+6. Look for potential contradictions or inconsistencies
+7. Identify assumptions that need validation`,
   EVALUATE_PROMPT: `You are a strict research assistant evaluating if questions have been thoroughly answered. 
 Only mark a question as answered if the text provides a complete, clear answer with supporting evidence.
 A question is NOT answered if:

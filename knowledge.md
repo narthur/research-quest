@@ -12,6 +12,15 @@ An Obsidian plugin that helps users deepen their research by generating intellig
 
 ## Key Concepts
 
+### Question Generation Strategy
+
+The plugin uses several strategies to generate high-quality research questions:
+- Extract relevant context using AI instead of arbitrary sections
+- Focus on gaps in understanding and areas needing deeper exploration
+- Consider document structure and existing knowledge
+- Prioritize questions that connect concepts or challenge assumptions
+- Look for methodological questions and potential contradictions
+
 ### Quest Management
 
 - Each quest is associated with a specific document

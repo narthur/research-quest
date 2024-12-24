@@ -67,8 +67,8 @@ export default async function refreshQuests(plugin: ResearchQuest) {
           fileContent,
           numQuestsNeeded
         );
-        const newQuests: Quest[] = newQuestions.map((question) => {
-          const contextSnapshot = extractContext(fileContent, question);
+        const newQuests: Quest[] = await Promise.all(newQuestions.map(async (question) => {
+          const contextSnapshot = await extractContext(fileContent, question, plugin.openai);
           return {
             id: crypto.randomUUID(),
             question,
@@ -81,7 +81,7 @@ export default async function refreshQuests(plugin: ResearchQuest) {
             contextSnapshot,
             lastValidated: Date.now(),
           };
-        });
+        }));
 
         // Save everything in one operation
         await plugin.storage.saveQuests([...updatedQuests, ...newQuests]);
