@@ -18,8 +18,9 @@ export class Settings extends PluginSettingTab {
     this.component = new SettingsComponent({
       target: containerEl,
       props: {
-        plugin: this.plugin
-      }
+        app: this.app,
+        plugin: this.plugin,
+      },
     });
   }
 

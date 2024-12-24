@@ -1,7 +1,9 @@
 <script lang="ts">
-  import { Notice } from "obsidian";
+  import { Notice, App } from "obsidian";
   import type ResearchQuest from "../index";
+  import ClearConfirmModal from "./ClearConfirmModal.ts";
 
+  export let app: App;
   export let plugin: ResearchQuest;
 
   let apiKey = plugin.settings?.OPENAI_API_KEY || "";
@@ -14,19 +16,12 @@
   }
 
   async function clearData() {
-    const shouldClear = await new Promise(resolve => {
-      plugin.app.modal.createConfirmModal({
-        title: "Clear Data",
-        content: "Are you sure you want to clear all research quests? This action cannot be undone.",
-        onAccept: () => resolve(true),
-        onCancel: () => resolve(false)
-      });
-    });
-
-    if (shouldClear) {
-      await plugin.storage.saveQuests([]);
+    const modal = new ClearConfirmModal(app, (shouldClear) => {
+      if (!shouldClear) return;
+      await app.plugin.storage.saveQuests([]);
       new Notice("Research quests cleared");
-    }
+    });
+    modal.open();
   }
 </script>
 
@@ -55,10 +50,6 @@
     </div>
   </div>
   <div class="setting-item-control">
-    <button
-      on:click={clearData}
-    >
-      Clear All Data
-    </button>
+    <button on:click={clearData}> Clear All Data </button>
   </div>
 </div>
