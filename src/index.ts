@@ -1,9 +1,22 @@
 import { Plugin, WorkspaceLeaf } from "obsidian";
 import { ExampleView, VIEW_TYPE_EXAMPLE } from "./ExampleView.js";
+import { Settings } from "./Settings.js";
+
+interface ResearchQuestSettings {
+  OPENAI_API_KEY: string;
+}
+
+const DEFAULT_SETTINGS: Partial<ResearchQuestSettings> = {};
 
 export default class ResearchQuest extends Plugin {
+  settings: ResearchQuestSettings | undefined;
+
   async onload() {
     console.log("loading plugin");
+
+    await this.loadSettings();
+
+    this.addSettingTab(new Settings(this.app, this));
 
     this.registerView(VIEW_TYPE_EXAMPLE, (leaf) => new ExampleView(leaf));
 
@@ -11,6 +24,15 @@ export default class ResearchQuest extends Plugin {
       this.activateView();
     });
   }
+
+  async loadSettings() {
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+  }
+
+  async saveSettings() {
+    await this.saveData(this.settings);
+  }
+
   async onunload() {
     console.log("unloading plugin");
   }
