@@ -57,8 +57,24 @@
   }
 
   $: activeFile = plugin.app.workspace.getActiveFile()?.path || "No file open";
-  $: activeQuests = quests.filter((q) => !q.isCompleted);
-  $: completedQuests = quests.filter((q) => q.isCompleted);
+  async function dismissQuest(questId: string) {
+    const updatedQuests = quests.map((q) => {
+      if (q.id === questId) {
+        return {
+          ...q,
+          isDismissed: true,
+          dismissedAt: Date.now(),
+        };
+      }
+      return q;
+    });
+    await plugin.storage.saveQuests(updatedQuests);
+    quests = updatedQuests;
+  }
+
+  $: activeQuests = quests.filter((q) => !q.isCompleted && !q.isDismissed);
+  $: completedQuests = quests.filter((q) => q.isCompleted && !q.isDismissed);
+  $: dismissedQuests = quests.filter((q) => q.isDismissed);
   $: hasOpenAIKey = !!plugin.openai;
 </script>
 
@@ -112,6 +128,13 @@
       {#each activeQuests as quest}
         <div class="quest-item">
           <span>{quest.question}</span>
+          <button 
+            class="dismiss-button" 
+            on:click={() => dismissQuest(quest.id)}
+            aria-label="Dismiss question"
+          >
+            ✕
+          </button>
         </div>
       {/each}
     </div>
@@ -127,6 +150,19 @@
       {/each}
     </div>
   </div>
+
+  {#if dismissedQuests.length > 0}
+    <div class="quest-section">
+      <h4>Dismissed</h4>
+      <div class="quest-list-content dismissed">
+        {#each dismissedQuests as quest}
+          <div class="quest-item dismissed">
+            <span>{quest.question}</span>
+          </div>
+        {/each}
+      </div>
+    </div>
+  {/if}
 </div>
 
 <style>
@@ -217,6 +253,30 @@
     padding: 0.5rem;
     border-radius: 4px;
     background-color: var(--background-secondary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .dismiss-button {
+    opacity: 0;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: opacity 0.2s ease;
+  }
+
+  .quest-item:hover .dismiss-button {
+    opacity: 1;
+  }
+
+  .dismiss-button:hover {
+    background-color: var(--background-modifier-hover);
+    color: var(--text-normal);
   }
 
   .quest-item:hover {

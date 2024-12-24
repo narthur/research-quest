@@ -2,8 +2,10 @@ export interface Quest {
   id: string;
   question: string;
   isCompleted: boolean;
+  isDismissed: boolean;
   createdAt: number;
   completedAt?: number;
+  dismissedAt?: number;
   documentId: string; // Add document ID
   documentPath: string; // Add document path for reference
 }
