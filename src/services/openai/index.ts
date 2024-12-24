@@ -43,7 +43,7 @@ export class OpenAIService {
     tools?: OpenAI.Chat.Completions.ChatCompletionTool[] | undefined
   ): Promise<any> {
     const response = await this.client.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: "gpt-4o",
       messages,
       tools: tools,
       temperature: 0.7,
