@@ -39,4 +39,4 @@ jobs:
           git tag -a "${{ github.event.inputs.version }}" -m "${{ github.event.inputs.version }}"
           git push origin main --tags
 
-          gh workflow run release.yml
+          gh workflow run release.yml --ref "${{ github.event.inputs.version }}"
