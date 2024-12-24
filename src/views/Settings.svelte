@@ -43,6 +43,23 @@
     }
   }
 
+  async function resetToDefaults() {
+    if (plugin.settings) {
+      // Keep the API key, reset everything else
+      const currentApiKey = plugin.settings.OPENAI_API_KEY;
+      plugin.settings = { ...DEFAULT_SETTINGS, OPENAI_API_KEY: currentApiKey };
+      await plugin.saveSettings();
+      
+      // Update local state
+      model = plugin.settings.MODEL;
+      generatePrompt = plugin.settings.GENERATE_PROMPT;
+      evaluatePrompt = plugin.settings.EVALUATE_PROMPT;
+      breakdownPrompt = plugin.settings.BREAKDOWN_PROMPT;
+      
+      new Notice("Settings reset to defaults");
+    }
+  }
+
   async function clearData() {
     const modal = new ClearConfirmModal(app, (shouldClear) => {
       if (!shouldClear) return;
@@ -147,6 +164,18 @@
     {#if loading}
       <span>Loading models...</span>
     {/if}
+  </div>
+</div>
+
+<div class="setting-item">
+  <div class="setting-item-info">
+    <div class="setting-item-name">Reset Settings</div>
+    <div class="setting-item-description">
+      Reset all settings to defaults (except API key)
+    </div>
+  </div>
+  <div class="setting-item-control">
+    <button on:click={resetToDefaults}>Reset to Defaults</button>
   </div>
 </div>
 
