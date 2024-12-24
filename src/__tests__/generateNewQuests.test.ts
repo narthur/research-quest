@@ -82,6 +82,7 @@ describe("generateNewQuests", () => {
     ];
 
     mockPlugin.storage.getQuests.mockResolvedValue(existingQuests);
+    mockPlugin.openai.generateQuestions.mockResolvedValue([]); // Mock empty array for initial questions check
     mockPlugin.openai.evaluateQuestions.mockResolvedValue({
       evaluations: [
         {
@@ -177,6 +178,57 @@ describe("generateNewQuests", () => {
         expect.objectContaining({ question: "New Question 2", isCompleted: false }),
         expect.objectContaining({ question: "New Question 3", isCompleted: false }),
       ])
+    );
+  });
+
+  it("should not re-evaluate completed questions", async () => {
+    // Start with a mix of completed and active questions
+    const existingQuests: Quest[] = [
+      {
+        id: "1",
+        question: "Completed question",
+        isCompleted: true,
+        isDismissed: false,
+        createdAt: Date.now() - 1000,
+        completedAt: Date.now(),
+        documentId: "test.md",
+        documentPath: "test.md",
+      },
+      {
+        id: "2",
+        question: "Active question",
+        isCompleted: false,
+        isDismissed: false,
+        createdAt: Date.now(),
+        documentId: "test.md",
+        documentPath: "test.md",
+      },
+    ];
+
+    mockPlugin.storage.getQuests.mockResolvedValue(existingQuests);
+    mockPlugin.openai.generateQuestions.mockResolvedValue([]); // Mock empty array for initial questions check
+    mockPlugin.openai.evaluateQuestions.mockResolvedValue({
+      evaluations: [
+        {
+          questionId: "2",
+          isAnswered: true,
+          explanation: "Found answer",
+        },
+      ],
+    });
+
+    await generateNewQuests(mockPlugin);
+
+    // Get the actual questions passed to evaluateQuestions
+    const evaluateCallArgs = mockPlugin.openai.evaluateQuestions.mock.calls[0][1];
+    
+    // Verify that only active questions were evaluated
+    expect(evaluateCallArgs).toHaveLength(1);
+    expect(evaluateCallArgs[0]).toEqual(
+      expect.objectContaining({
+        id: "2",
+        question: "Active question",
+      })
     );
   });
 });
