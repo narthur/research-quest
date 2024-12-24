@@ -124,6 +124,11 @@ Return false if:
     loadQuests();
   });
 
+  // Watch for changes in OpenAI service availability
+  $: if (hasOpenAIKey) {
+    loadQuests();
+  }
+
   $: activeFile = plugin.app.workspace.getActiveFile()?.basename || "No file open";
   $: activeQuests = quests.filter(q => !q.isCompleted);
   $: completedQuests = quests.filter(q => q.isCompleted);

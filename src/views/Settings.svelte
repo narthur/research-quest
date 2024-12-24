@@ -15,7 +15,7 @@
 
   async function clearData() {
     const shouldClear = await new Promise(resolve => {
-      const modal = plugin.app.modal.createConfirmModal({
+      plugin.app.modal.createConfirmModal({
         title: "Clear Data",
         content: "Are you sure you want to clear all research quests? This action cannot be undone.",
         onAccept: () => resolve(true),
@@ -56,7 +56,6 @@
   </div>
   <div class="setting-item-control">
     <button
-      class="mod-warning"
       on:click={clearData}
     >
       Clear All Data
