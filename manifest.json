@@ -1,0 +1,11 @@
+{
+    "id": "research-quest",
+    "name": "Research Quest",
+    "version": "0.0.1",
+    "minAppVersion": "0.15.0",
+    "description": "A plugin.",
+    "author": "Nathan Arthur",
+    "authorUrl": "https://nathanarthur.com",
+    "fundingUrl": "https://ko-fi.com/narthur",
+    "isDesktopOnly": false
+}
