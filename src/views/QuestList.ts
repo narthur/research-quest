@@ -20,13 +20,9 @@ export class QuestList extends ItemView {
   }
 
   async onOpen() {
-    const props = {
-      variable: 1,
-    };
-
     this.component = new QuestListComponent({
       target: this.contentEl,
-      props,
+      props: {}
     });
   }
 
