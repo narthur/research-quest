@@ -20,7 +20,7 @@ export default class ResearchQuest extends Plugin {
 
     this.addSettingTab(new Settings(this.app, this));
 
-    this.registerView(VIEW_TYPE_QUEST_LIST, (leaf) => new QuestList(leaf));
+    this.registerView(VIEW_TYPE_QUEST_LIST, (leaf) => new QuestList(leaf, this));
 
     this.addRibbonIcon("sparkles", "Activate view", () => {
       this.activateView();

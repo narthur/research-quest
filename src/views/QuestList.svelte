@@ -1,4 +1,8 @@
 <script lang="ts">
+  import type ResearchQuest from "../index";
+
+  export let plugin: ResearchQuest;
+
   const activeQuests = [
     "What are the key factors that influence climate change?",
     "How does artificial intelligence impact modern healthcare?",
@@ -17,9 +21,16 @@
     // TODO: Implement refresh logic
     console.log("Refresh clicked");
   }
+
+  $: activeFile = plugin.app.workspace.getActiveFile()?.basename || "No file open";
 </script>
 
 <div class="quest-list">
+  <div class="active-file">
+    <span class="label">Current document:</span>
+    <span class="value">{activeFile}</span>
+  </div>
+
   <div class="quest-list-header">
     <h3>Research Questions</h3>
     <button class="refresh-button" on:click={handleRefresh}>
@@ -53,6 +64,18 @@
 <style>
   .quest-list {
     padding: 1rem;
+  }
+
+  .active-file {
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    background-color: var(--background-secondary);
+    border-radius: 4px;
+  }
+
+  .active-file .label {
+    color: var(--text-muted);
+    margin-right: 0.5rem;
   }
 
   .quest-list-header {

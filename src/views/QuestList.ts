@@ -1,14 +1,16 @@
 import { ItemView, WorkspaceLeaf } from "obsidian";
-
+import type ResearchQuest from "../index";
 import QuestListComponent from "./QuestList.svelte";
 
 export const VIEW_TYPE_QUEST_LIST = "quest-list-view";
 
 export class QuestList extends ItemView {
   component: QuestListComponent | undefined;
+  plugin: ResearchQuest;
 
-  constructor(leaf: WorkspaceLeaf) {
+  constructor(leaf: WorkspaceLeaf, plugin: ResearchQuest) {
     super(leaf);
+    this.plugin = plugin;
   }
 
   getViewType() {
@@ -22,7 +24,9 @@ export class QuestList extends ItemView {
   async onOpen() {
     this.component = new QuestListComponent({
       target: this.contentEl,
-      props: {}
+      props: {
+        plugin: this.plugin
+      }
     });
   }
 
