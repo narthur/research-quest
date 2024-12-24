@@ -12,7 +12,7 @@ export default [
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    files: ["*.test.ts", "*.spec.ts"],
+    files: ["**/*.test.ts", "**/*.spec.ts"],
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
     },
