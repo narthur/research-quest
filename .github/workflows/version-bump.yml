@@ -21,6 +21,8 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Update manifest.json
           jq '.version = "${{ github.event.inputs.version }}"' manifest.json > manifest.json.tmp
@@ -35,3 +37,5 @@ jobs:
           # Create and push tag
           git tag -a "${{ github.event.inputs.version }}" -m "${{ github.event.inputs.version }}"
           git push origin main --tags
+
+          gh workflow run release.yml
