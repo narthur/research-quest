@@ -15,30 +15,10 @@ export default async function generateNewQuests(plugin: ResearchQuest) {
   try {
     const fileContent = await plugin.app.vault.read(activeFile);
     const quests = await plugin.storage.getQuests();
-    const currentActiveQuests = quests.filter(
-      (q) => !q.isCompleted && !q.isDismissed && q.documentId === activeFile.path
-    );
-    const numQuestsNeeded = 5 - currentActiveQuests.length;
+    const currentQuests = quests.filter(q => q.documentId === activeFile.path);
+    const currentActiveQuests = currentQuests.filter(q => !q.isCompleted && !q.isDismissed);
 
-    if (numQuestsNeeded > 0) {
-      const newQuestions = await plugin.openai.generateQuestions(
-        fileContent,
-        numQuestsNeeded
-      );
-      const newQuests: Quest[] = newQuestions.map((question) => ({
-        id: crypto.randomUUID(),
-        question,
-        isCompleted: false,
-        isDismissed: false,
-        createdAt: Date.now(),
-        documentId: activeFile.path,
-        documentPath: activeFile.path,
-      }));
-
-      await plugin.storage.saveQuests([...quests, ...newQuests]);
-    }
-
-    // Check for completed quests
+    // First evaluate existing quests
     if (currentActiveQuests.length > 0) {
       const evaluations = await plugin.openai.evaluateQuestions(
         fileContent,
@@ -46,7 +26,7 @@ export default async function generateNewQuests(plugin: ResearchQuest) {
       );
 
       // Update quest completion status based on evaluations
-      const updated = quests.map((quest) => {
+      const updatedQuests = quests.map((quest) => {
         const evaluation = evaluations.evaluations.find(
           (e) => e.questionId === quest.id
         );
@@ -60,18 +40,17 @@ export default async function generateNewQuests(plugin: ResearchQuest) {
         return quest;
       });
 
-      await plugin.storage.saveQuests(updated);
-
-      // After marking quests complete, check if we need to generate more
-      const remainingActiveQuests = updated.filter(
-        (q) => !q.isCompleted && q.documentId === activeFile.path
+      // Calculate how many new quests we need after evaluations
+      const remainingActiveQuests = updatedQuests.filter(
+        (q) => !q.isCompleted && !q.isDismissed && q.documentId === activeFile.path
       );
-      const additionalQuestsNeeded = 5 - remainingActiveQuests.length;
+      const numQuestsNeeded = 5 - remainingActiveQuests.length;
 
-      if (additionalQuestsNeeded > 0) {
+      if (numQuestsNeeded > 0) {
+        // Generate new questions in a single batch
         const newQuestions = await plugin.openai.generateQuestions(
           fileContent,
-          additionalQuestsNeeded
+          numQuestsNeeded
         );
         const newQuests: Quest[] = newQuestions.map((question) => ({
           id: crypto.randomUUID(),
@@ -83,8 +62,26 @@ export default async function generateNewQuests(plugin: ResearchQuest) {
           documentPath: activeFile.path,
         }));
 
-        await plugin.storage.saveQuests([...updated, ...newQuests]);
+        // Save everything in one operation
+        await plugin.storage.saveQuests([...updatedQuests, ...newQuests]);
+      } else {
+        // Just save the updated completion statuses
+        await plugin.storage.saveQuests(updatedQuests);
       }
+    } else {
+      // No existing quests, just generate 5 new ones
+      const newQuestions = await plugin.openai.generateQuestions(fileContent, 5);
+      const newQuests: Quest[] = newQuestions.map((question) => ({
+        id: crypto.randomUUID(),
+        question,
+        isCompleted: false,
+        isDismissed: false,
+        createdAt: Date.now(),
+        documentId: activeFile.path,
+        documentPath: activeFile.path,
+      }));
+
+      await plugin.storage.saveQuests([...quests, ...newQuests]);
     }
   } catch (error) {
     console.error("Error refreshing quests:", error);
