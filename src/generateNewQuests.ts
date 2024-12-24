@@ -62,6 +62,29 @@ export default async function generateNewQuests(plugin: ResearchQuest) {
       });
 
       await plugin.storage.saveQuests(updated);
+
+      // After marking quests complete, check if we need to generate more
+      const remainingActiveQuests = updated.filter(
+        (q) => !q.isCompleted && q.documentId === activeFile.path
+      );
+      const additionalQuestsNeeded = 5 - remainingActiveQuests.length;
+
+      if (additionalQuestsNeeded > 0) {
+        const newQuestions = await plugin.openai.generateQuestions(
+          fileContent,
+          additionalQuestsNeeded
+        );
+        const newQuests: Quest[] = newQuestions.map((question) => ({
+          id: crypto.randomUUID(),
+          question,
+          isCompleted: false,
+          createdAt: Date.now(),
+          documentId: activeFile.path,
+          documentPath: activeFile.path,
+        }));
+
+        await plugin.storage.saveQuests([...updated, ...newQuests]);
+      }
     }
   } catch (error) {
     console.error("Error refreshing quests:", error);

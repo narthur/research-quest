@@ -125,4 +125,56 @@ describe("generateNewQuests", () => {
       expect.any(Error)
     );
   });
+
+  it("should generate new questions when existing questions are marked complete", async () => {
+    // Start with 5 existing questions
+    const existingQuests: Quest[] = Array.from({ length: 5 }, (_, i) => ({
+      id: `${i + 1}`,
+      question: `Question ${i + 1}`,
+      isCompleted: false,
+      createdAt: Date.now(),
+      documentId: "test.md",
+      documentPath: "test.md",
+    }));
+
+    mockPlugin.storage.getQuests.mockResolvedValue(existingQuests);
+
+    // Mock that 3 questions are now complete
+    mockPlugin.openai.evaluateQuestions.mockResolvedValue({
+      evaluations: [
+        { questionId: "1", isAnswered: true, explanation: "Found answer" },
+        { questionId: "2", isAnswered: true, explanation: "Found answer" },
+        { questionId: "3", isAnswered: true, explanation: "Found answer" },
+        { questionId: "4", isAnswered: false, explanation: "No answer yet" },
+        { questionId: "5", isAnswered: false, explanation: "No answer yet" },
+      ],
+    });
+
+    // Mock that 3 new questions will be generated to get back to 5 active questions
+    mockPlugin.openai.generateQuestions
+      .mockResolvedValueOnce([]) // First call during initial check (no new questions needed)
+      .mockResolvedValueOnce(["New Question 1", "New Question 2", "New Question 3"]); // Second call after marking complete
+
+    await generateNewQuests(mockPlugin);
+
+    // Verify that new questions were generated after marking complete
+    await generateNewQuests(mockPlugin);
+    expect(mockPlugin.openai.generateQuestions).toHaveBeenLastCalledWith("Test content", 3);
+
+    // Verify final state has 5 active questions (2 original + 3 new)
+    const savedQuests = mockPlugin.storage.saveQuests.mock.calls.at(-1)[0];
+    const activeQuests = savedQuests.filter((q: Quest) => !q.isCompleted);
+    expect(activeQuests).toHaveLength(5);
+
+    // Verify the specific questions that should be active
+    expect(activeQuests).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ question: "Question 4", isCompleted: false }),
+        expect.objectContaining({ question: "Question 5", isCompleted: false }),
+        expect.objectContaining({ question: "New Question 1", isCompleted: false }),
+        expect.objectContaining({ question: "New Question 2", isCompleted: false }),
+        expect.objectContaining({ question: "New Question 3", isCompleted: false }),
+      ])
+    );
+  });
 });
