@@ -2,6 +2,7 @@
   import { Notice, App } from "obsidian";
   import type ResearchQuest from "../index";
   import ClearConfirmModal from "./ClearConfirmModal.js";
+  import { DEFAULT_SETTINGS } from "../index";
 
   export let app: App;
   export let plugin: ResearchQuest;
@@ -27,17 +28,17 @@
 
   async function loadModels() {
     if (!plugin.openai) return;
-    
+
     loading = true;
     try {
       const response = await plugin.openai.client.models.list();
       models = response.data
-        .map(m => m.id)
-        .filter(id => id.startsWith('gpt'))
+        .map((m) => m.id)
+        .filter((id) => id.startsWith("gpt"))
         .sort();
     } catch (error) {
-      console.error('Failed to load models:', error);
-      new Notice('Failed to load available models');
+      console.error("Failed to load models:", error);
+      new Notice("Failed to load available models");
     } finally {
       loading = false;
     }
@@ -49,13 +50,13 @@
       const currentApiKey = plugin.settings.OPENAI_API_KEY;
       plugin.settings = { ...DEFAULT_SETTINGS, OPENAI_API_KEY: currentApiKey };
       await plugin.saveSettings();
-      
+
       // Update local state
       model = plugin.settings.MODEL;
       generatePrompt = plugin.settings.GENERATE_PROMPT;
       evaluatePrompt = plugin.settings.EVALUATE_PROMPT;
       breakdownPrompt = plugin.settings.BREAKDOWN_PROMPT;
-      
+
       new Notice("Settings reset to defaults");
     }
   }
@@ -151,9 +152,7 @@
 <div class="setting-item">
   <div class="setting-item-info">
     <div class="setting-item-name">Model</div>
-    <div class="setting-item-description">
-      Select the OpenAI model to use
-    </div>
+    <div class="setting-item-description">Select the OpenAI model to use</div>
   </div>
   <div class="setting-item-control">
     <select bind:value={model} on:change={saveSettings} disabled={loading}>

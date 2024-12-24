@@ -13,16 +13,18 @@ interface ResearchQuestSettings {
   BREAKDOWN_PROMPT: string;
 }
 
-const DEFAULT_SETTINGS: Partial<ResearchQuestSettings> = {
+export const DEFAULT_SETTINGS: Omit<ResearchQuestSettings, "OPENAI_API_KEY"> = {
   MODEL: "gpt-4",
-  GENERATE_PROMPT: "You are a research assistant helping to generate focused research questions.",
+  GENERATE_PROMPT:
+    "You are a research assistant helping to generate focused research questions.",
   EVALUATE_PROMPT: `You are a strict research assistant evaluating if questions have been thoroughly answered. 
 Only mark a question as answered if the text provides a complete, clear answer with supporting evidence.
 A question is NOT answered if:
 - The answer is partial or incomplete
 - The text only tangentially relates to the question
 - The question requires information not present in the text`,
-  BREAKDOWN_PROMPT: "You are a research assistant helping to break down complex research questions into more specific, focused sub-questions."
+  BREAKDOWN_PROMPT:
+    "You are a research assistant helping to break down complex research questions into more specific, focused sub-questions.",
 };
 
 export default class ResearchQuest extends Plugin {
@@ -61,12 +63,12 @@ export default class ResearchQuest extends Plugin {
     this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
     if (this.settings?.OPENAI_API_KEY) {
       this.openai = createOpenAIService(
-        this.settings.OPENAI_API_KEY, 
+        this.settings.OPENAI_API_KEY,
         this.settings.MODEL,
         {
           generatePrompt: this.settings.GENERATE_PROMPT,
           evaluatePrompt: this.settings.EVALUATE_PROMPT,
-          breakdownPrompt: this.settings.BREAKDOWN_PROMPT
+          breakdownPrompt: this.settings.BREAKDOWN_PROMPT,
         }
       );
     }
@@ -76,12 +78,12 @@ export default class ResearchQuest extends Plugin {
     await this.saveData(this.settings);
     if (this.settings?.OPENAI_API_KEY) {
       this.openai = createOpenAIService(
-        this.settings.OPENAI_API_KEY, 
+        this.settings.OPENAI_API_KEY,
         this.settings.MODEL,
         {
           generatePrompt: this.settings.GENERATE_PROMPT,
           evaluatePrompt: this.settings.EVALUATE_PROMPT,
-          breakdownPrompt: this.settings.BREAKDOWN_PROMPT
+          breakdownPrompt: this.settings.BREAKDOWN_PROMPT,
         }
       );
     } else {
