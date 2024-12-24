@@ -1,9 +1,5 @@
 import OpenAI from "openai";
-
-interface QuestionEvaluation {
-  isAnswered: boolean;
-  explanation: string;
-}
+import type { ChatCompletion } from "openai/resources/index.mjs";
 
 interface GenerateQuestionsResponse {
   questions: string[];
@@ -41,7 +37,11 @@ export class OpenAIService {
   async chat(
     messages: { role: "system" | "user" | "assistant"; content: string }[],
     tools?: OpenAI.Chat.Completions.ChatCompletionTool[] | undefined
-  ): Promise<any> {
+  ): Promise<
+    | EvaluateQuestionsResponse
+    | GenerateQuestionsResponse
+    | ChatCompletion.Choice["message"]
+  > {
     const response = await this.client.chat.completions.create({
       model: "gpt-4o",
       messages,
@@ -59,7 +59,7 @@ export class OpenAIService {
   }
 
   async generateQuestions(text: string, count: number): Promise<string[]> {
-    const result = (await this.chat(
+    const result = await this.chat(
       [
         {
           role: "system",
@@ -95,7 +95,11 @@ export class OpenAIService {
           },
         },
       ]
-    )) as GenerateQuestionsResponse;
+    );
+
+    if (!("questions" in result)) {
+      throw new Error("No questions generated");
+    }
 
     return result.questions;
   }
@@ -104,7 +108,7 @@ export class OpenAIService {
     text: string,
     questions: { id: string; question: string }[]
   ): Promise<EvaluateQuestionsResponse> {
-    return (await this.chat(
+    const result = await this.chat(
       [
         {
           role: "system",
@@ -166,7 +170,13 @@ ${questions.map((q) => `[${q.id}] ${q.question}`).join("\n")}`,
           },
         },
       ]
-    )) as EvaluateQuestionsResponse;
+    );
+
+    if (!("evaluations" in result)) {
+      throw new Error("No evaluations generated");
+    }
+
+    return result;
   }
 
   async breakdownQuestion(text: string, question: string): Promise<string[]> {
@@ -192,7 +202,8 @@ Generate 3-5 more specific sub-questions that would help answer the main questio
           type: "function" as const,
           function: {
             name: "generate_sub_questions",
-            description: "Generate more specific sub-questions that help break down a broader research question",
+            description:
+              "Generate more specific sub-questions that help break down a broader research question",
             parameters: {
               type: "object",
               properties: {
@@ -211,6 +222,10 @@ Generate 3-5 more specific sub-questions that would help answer the main questio
         },
       ]
     );
+
+    if (!("questions" in result)) {
+      throw new Error("No questions generated");
+    }
 
     return result.questions;
   }

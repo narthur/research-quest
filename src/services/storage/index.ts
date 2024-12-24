@@ -1,3 +1,5 @@
+import type ResearchQuest from "../..";
+
 export interface Quest {
   id: string;
   question: string;
@@ -13,10 +15,10 @@ export interface Quest {
 }
 
 export class StorageService {
-  private plugin: any;
+  private plugin: ResearchQuest;
   private QUESTS_KEY = "quests";
 
-  constructor(plugin: any) {
+  constructor(plugin: ResearchQuest) {
     this.plugin = plugin;
   }
 
