@@ -83,7 +83,7 @@ export default class ResearchQuest extends Plugin {
     if (leaf) workspace.revealLeaf(leaf);
   }
 
-  async saveData(data: any): Promise<void> {
+  async saveData(data: unknown): Promise<void> {
     const result = await super.saveData(data);
     this.events.emit("data-updated", data);
     return result;

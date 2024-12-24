@@ -1,4 +1,4 @@
-type EventCallback = (...args: any[]) => void;
+type EventCallback = (...args: unknown[]) => void;
 
 export class EventEmitter {
   private events: Map<string, Set<EventCallback>>;
@@ -18,7 +18,7 @@ export class EventEmitter {
     this.events.get(event)?.delete(callback);
   }
 
-  emit(event: string, ...args: any[]) {
-    this.events.get(event)?.forEach(callback => callback(...args));
+  emit(event: string, ...args: unknown[]) {
+    this.events.get(event)?.forEach((callback) => callback(...args));
   }
 }
