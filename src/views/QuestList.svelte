@@ -45,8 +45,9 @@
 
   $: activeFile =
     plugin.app.workspace.getActiveFile()?.basename || "No file open";
-  $: activeQuests = quests.filter((q) => !q.isCompleted);
-  $: completedQuests = quests.filter((q) => q.isCompleted);
+  $: currentDocumentId = plugin.app.workspace.getActiveFile()?.path;
+  $: activeQuests = quests.filter((q) => !q.isCompleted && q.documentId === currentDocumentId);
+  $: completedQuests = quests.filter((q) => q.isCompleted && q.documentId === currentDocumentId);
   $: hasOpenAIKey = !!plugin.openai;
 </script>
 

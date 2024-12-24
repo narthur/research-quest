@@ -4,6 +4,8 @@ export interface Quest {
   isCompleted: boolean;
   createdAt: number;
   completedAt?: number;
+  documentId: string;  // Add document ID
+  documentPath: string;  // Add document path for reference
 }
 
 export class StorageService {
@@ -17,6 +19,11 @@ export class StorageService {
   async getQuests(): Promise<Quest[]> {
     const data = await this.plugin.loadData();
     return data?.[this.QUESTS_KEY] || [];
+  }
+
+  async getQuestsForDocument(documentId: string): Promise<Quest[]> {
+    const quests = await this.getQuests();
+    return quests.filter(quest => quest.documentId === documentId);
   }
 
   async saveQuests(quests: Quest[]): Promise<void> {

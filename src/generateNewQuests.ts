@@ -16,7 +16,9 @@ export default async function generateNewQuests(plugin: ResearchQuest) {
   try {
     const fileContent = await plugin.app.vault.read(activeFile);
     const quests = await plugin.storage.getQuests();
-    const currentActiveQuests = quests.filter((q) => !q.isCompleted);
+    const currentActiveQuests = quests.filter(
+      (q) => !q.isCompleted && q.documentId === activeFile.path
+    );
     const numQuestsNeeded = 5 - currentActiveQuests.length;
 
     if (numQuestsNeeded > 0) {
@@ -30,6 +32,8 @@ export default async function generateNewQuests(plugin: ResearchQuest) {
         question,
         isCompleted: false,
         createdAt: Date.now(),
+        documentId: activeFile.path,
+        documentPath: activeFile.path,
       }));
 
       await plugin.storage.saveQuests([...quests, ...newQuests]);
