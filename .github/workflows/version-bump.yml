@@ -1,0 +1,34 @@
+name: Version Bump
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'New version number (e.g., 1.0.1)'
+        required: true
+        type: string
+
+jobs:
+  bump-version:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update version
+        run: |
+          # Update manifest.json
+          jq '.version = "${{ github.event.inputs.version }}"' manifest.json > manifest.json.tmp
+          mv manifest.json.tmp manifest.json
+
+          # Commit changes
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git add manifest.json
+          git commit -m "Bump version to ${{ github.event.inputs.version }}"
+
+          # Create and push tag
+          git tag -a "${{ github.event.inputs.version }}" -m "${{ github.event.inputs.version }}"
+          git push origin main --tags
