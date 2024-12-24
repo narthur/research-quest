@@ -9,6 +9,12 @@
   let quests: Quest[] = [];
   let isLoading = false;
 
+  function openSettings() {
+    const a = plugin.app as any;
+    a.setting.open();
+    a.setting.openTabById("research-quest");
+  }
+
   async function loadQuests() {
     const storage = plugin.storage;
     if (storage) {
@@ -72,8 +78,7 @@
       </p>
       <button
         on:click={() => {
-          plugin.app.setting.open();
-          plugin.app.setting.openTabById("research-quest");
+          openSettings();
         }}
       >
         Open Settings
@@ -92,8 +97,7 @@
       <button
         class="settings-button"
         on:click={() => {
-          plugin.app.setting.open();
-          plugin.app.setting.openTabById("research-quest");
+          openSettings();
         }}
         aria-label="Open settings"
       >
