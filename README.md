@@ -18,7 +18,7 @@ An Obsidian plugin that uses AI to generate and track research questions based o
 ## Usage
 
 1. Open a note you want to research further
-2. Click the sparkle icon in the ribbon to open the Research Quest view
+2. Click the microscope icon in the ribbon to open the Research Quest view
 3. Click "Refresh" to analyze your current document and generate research questions
 4. Questions will be automatically marked as complete when your document answers them
 

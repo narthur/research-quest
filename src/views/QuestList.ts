@@ -21,12 +21,16 @@ export class QuestList extends ItemView {
     return "Quest List";
   }
 
+  getIcon() {
+    return "microscope";
+  }
+
   async onOpen() {
     this.component = new QuestListComponent({
       target: this.contentEl,
       props: {
-        plugin: this.plugin
-      }
+        plugin: this.plugin,
+      },
     });
   }
 

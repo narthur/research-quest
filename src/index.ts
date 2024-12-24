@@ -30,7 +30,7 @@ export default class ResearchQuest extends Plugin {
       (leaf) => new QuestList(leaf, this)
     );
 
-    this.addRibbonIcon("sparkles", "Open: Research Quests", () => {
+    this.addRibbonIcon("microscope", "Open: Research Quests", () => {
       this.activateView();
     });
 
