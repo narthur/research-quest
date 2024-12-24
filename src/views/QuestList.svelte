@@ -18,7 +18,7 @@
   async function loadQuests() {
     const storage = plugin.storage;
     if (storage) {
-      quests = await storage.getQuests();
+      quests = await storage.getQuestsForDocument(activeFile);
     }
   }
 
@@ -40,8 +40,7 @@
 
     // Listen for active leaf changes
     plugin.events.on("active-leaf-changed", () => {
-      activeFile =
-        plugin.app.workspace.getActiveFile()?.basename || "No file open";
+      activeFile = plugin.app.workspace.getActiveFile()?.path || "No file open";
       loadQuests();
     });
 
@@ -57,15 +56,9 @@
     loadQuests();
   }
 
-  $: activeFile =
-    plugin.app.workspace.getActiveFile()?.basename || "No file open";
-  $: currentDocumentId = plugin.app.workspace.getActiveFile()?.path;
-  $: activeQuests = quests.filter(
-    (q) => !q.isCompleted && q.documentId === currentDocumentId
-  );
-  $: completedQuests = quests.filter(
-    (q) => q.isCompleted && q.documentId === currentDocumentId
-  );
+  $: activeFile = plugin.app.workspace.getActiveFile()?.path || "No file open";
+  $: activeQuests = quests.filter((q) => !q.isCompleted);
+  $: completedQuests = quests.filter((q) => q.isCompleted);
   $: hasOpenAIKey = !!plugin.openai;
 </script>
 
