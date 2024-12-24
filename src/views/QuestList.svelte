@@ -151,7 +151,19 @@ Return false if:
   </div>
 
   <div class="quest-list-header">
-    <h3>Research Questions</h3>
+    <div class="header-left">
+      <h3>Research Questions</h3>
+      <button 
+        class="settings-button"
+        on:click={() => {
+          plugin.app.setting.open();
+          plugin.app.setting.openTabById('research-quest');
+        }}
+        aria-label="Open settings"
+      >
+        ⚙️
+      </button>
+    </div>
     <button 
       class="refresh-button" 
       on:click={handleRefresh}
@@ -218,6 +230,24 @@ Return false if:
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1rem;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .settings-button {
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+
+  .settings-button:hover {
+    background-color: var(--background-secondary);
   }
 
   .quest-list-header h3 {
