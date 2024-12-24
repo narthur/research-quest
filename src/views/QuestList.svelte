@@ -22,7 +22,6 @@
   function handleRefresh() {
     isLoading = true;
     generateNewQuests(plugin).finally(() => {
-      loadQuests();
       isLoading = false;
     });
   }
@@ -32,7 +31,10 @@
 
     // Listen for data updates
     plugin.events.on("data-updated", () => {
-      loadQuests();
+      // Only reload if we're not currently generating new quests
+      if (!isLoading) {
+        loadQuests();
+      }
     });
 
     // Listen for active leaf changes
