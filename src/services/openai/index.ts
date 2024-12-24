@@ -51,8 +51,6 @@ export class OpenAIService {
 
     const choice = response.choices[0];
 
-    console.log({ choice });
-
     if (choice.finish_reason === "tool_calls" && choice.message.tool_calls) {
       return JSON.parse(choice.message.tool_calls[0].function.arguments);
     }
@@ -98,8 +96,6 @@ export class OpenAIService {
         },
       ]
     )) as GenerateQuestionsResponse;
-
-    console.log({ result });
 
     return result.questions;
   }

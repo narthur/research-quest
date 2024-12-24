@@ -18,7 +18,6 @@ export default class ResearchQuest extends Plugin {
   events!: EventEmitter;
 
   async onload() {
-    console.log("loading plugin");
     this.events = new EventEmitter();
     this.storage = new StorageService(this);
 
@@ -37,9 +36,9 @@ export default class ResearchQuest extends Plugin {
 
     // Register event listener for active leaf changes
     this.registerEvent(
-      this.app.workspace.on('active-leaf-change', () => {
+      this.app.workspace.on("active-leaf-change", () => {
         // Emit an event that our QuestList component can listen to
-        this.events.emit('active-leaf-changed');
+        this.events.emit("active-leaf-changed");
       })
     );
   }
@@ -61,7 +60,7 @@ export default class ResearchQuest extends Plugin {
   }
 
   async onunload() {
-    console.log("unloading plugin");
+    // TODO: Implement onunload
   }
 
   async activateView() {
@@ -85,9 +84,8 @@ export default class ResearchQuest extends Plugin {
   }
 
   async saveData(data: any): Promise<void> {
-    console.log("saving data", data);
     const result = await super.saveData(data);
-    this.events.emit('data-updated', data);
+    this.events.emit("data-updated", data);
     return result;
   }
 }

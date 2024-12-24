@@ -9,7 +9,6 @@ export default async function generateNewQuests(plugin: ResearchQuest) {
 
   const activeFile = plugin.app.workspace.getActiveFile();
   if (!activeFile) {
-    console.log("No active file");
     return;
   }
 
@@ -26,7 +25,6 @@ export default async function generateNewQuests(plugin: ResearchQuest) {
         fileContent,
         numQuestsNeeded
       );
-      console.log("New questions:", newQuestions);
       const newQuests: Quest[] = newQuestions.map((question) => ({
         id: crypto.randomUUID(),
         question,
