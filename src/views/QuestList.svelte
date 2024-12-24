@@ -154,26 +154,6 @@
     </div>
   {/if}
 
-  <div class="active-file">
-    <span class="label">Current document:</span>
-    <span class="value">{activeFile}</span>
-  </div>
-
-  <div class="quest-stats">
-    <div class="stat-item">
-      <span class="stat-value">{activeQuests.length}</span>
-      <span class="stat-label">Active</span>
-    </div>
-    <div class="stat-item">
-      <span class="stat-value">{completedQuests.length}</span>
-      <span class="stat-label">Completed</span>
-    </div>
-    <div class="stat-item">
-      <span class="stat-value">{dismissedQuests.length}</span>
-      <span class="stat-label">Dismissed</span>
-    </div>
-  </div>
-
   <div class="quest-list-header">
     <div class="header-left">
       <h3>Research Questions</h3>
@@ -194,6 +174,26 @@
     >
       {isLoading ? "Loading..." : "Refresh"}
     </button>
+  </div>
+
+  <div class="quest-stats">
+    <div class="stat-item">
+      <span class="stat-value">{activeQuests.length}</span>
+      <span class="stat-label">Active</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-value">{completedQuests.length}</span>
+      <span class="stat-label">Completed</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-value">{dismissedQuests.length}</span>
+      <span class="stat-label">Dismissed</span>
+    </div>
+  </div>
+
+  <div class="active-file">
+    <span class="label">Current document:</span>
+    <span class="value">{activeFile}</span>
   </div>
 
   <div class="quest-section">
