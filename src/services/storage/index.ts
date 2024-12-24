@@ -12,6 +12,12 @@ export interface Quest {
   documentPath: string;
   parentId?: string; // Add parent question ID for hierarchical questions
   isParentQuestion?: boolean; // Flag to identify questions that have been broken down
+  // Obsolescence tracking
+  contextHash?: string;
+  contextSnapshot?: string;
+  lastValidated?: number;
+  isObsolete?: boolean;
+  obsoleteReason?: string;
 }
 
 export class StorageService {

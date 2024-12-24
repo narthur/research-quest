@@ -2,7 +2,10 @@
   import type ResearchQuest from "../index";
   import type { Quest } from "../services/storage";
   import { onMount } from "svelte";
-  import generateNewQuests from "../generateNewQuests.js";
+  import generateNewQuests, {
+    extractContext,
+    generateContextHash,
+  } from "../generateNewQuests.js";
   import { Notice } from "obsidian";
 
   export let plugin: ResearchQuest;
@@ -139,7 +142,7 @@
   }
 
   $: activeQuests = quests
-    .filter((q) => !q.isCompleted && !q.isDismissed)
+    .filter((q) => !q.isCompleted && !q.isDismissed && !q.isObsolete)
     .sort((a, b) => {
       // Sort parent questions before their children
       if (a.parentId && !b.parentId) return 1;
@@ -150,6 +153,48 @@
   $: completedQuests = quests.filter((q) => q.isCompleted && !q.isDismissed);
   $: dismissedQuests = quests.filter((q) => q.isDismissed);
   $: hasOpenAIKey = !!plugin.openai;
+
+  $: obsoleteQuests = quests.filter((q) => q.isObsolete && !q.isDismissed);
+
+  async function regenerateQuest(quest: Quest) {
+    if (!plugin.openai) return;
+
+    const activeFile = plugin.app.workspace.getActiveFile();
+    if (!activeFile) return;
+
+    isLoading = true;
+    try {
+      const fileContent = await plugin.app.vault.read(activeFile);
+      const newQuestions = await plugin.openai.generateQuestions(
+        fileContent,
+        1
+      );
+
+      if (newQuestions.length === 0) return;
+
+      const contextSnapshot = extractContext(fileContent, newQuestions[0]);
+      const updatedQuests = quests.map((q) => {
+        if (q.id === quest.id) {
+          return {
+            ...q,
+            question: newQuestions[0],
+            isObsolete: false,
+            contextHash: generateContextHash(fileContent),
+            contextSnapshot,
+            lastValidated: Date.now(),
+          };
+        }
+        return q;
+      });
+
+      await plugin.storage.saveQuests(updatedQuests);
+      quests = updatedQuests;
+    } catch (error) {
+      console.error("Error regenerating quest:", error);
+    } finally {
+      isLoading = false;
+    }
+  }
 </script>
 
 <div class="quest-list">
@@ -166,6 +211,41 @@
       >
         Open Settings
       </button>
+    </div>
+  {/if}
+
+  {#if obsoleteQuests.length > 0}
+    <div class="quest-section">
+      <h4>Needs Review</h4>
+      <div class="quest-list-content obsolete">
+        {#each obsoleteQuests as quest}
+          <div class="quest-item obsolete">
+            <div class="quest-content">
+              <span>{quest.question}</span>
+              <div class="obsolete-badge" title={quest.obsoleteReason}>
+                Obsolete
+              </div>
+            </div>
+            <div class="quest-actions">
+              <button
+                class="action-button"
+                on:click={() => regenerateQuest(quest)}
+                aria-label="Regenerate question"
+                title="Regenerate question"
+              >
+                🔄
+              </button>
+              <button
+                class="dismiss-button"
+                on:click={() => dismissQuest(quest.id)}
+                aria-label="Dismiss question"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        {/each}
+      </div>
     </div>
   {/if}
 
@@ -281,6 +361,25 @@
 </div>
 
 <style>
+  .quest-content {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+  }
+
+  .obsolete-badge {
+    font-size: 0.8em;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background-color: var(--text-muted);
+    color: var(--background-primary);
+    opacity: 0.8;
+  }
+
+  .quest-item.obsolete {
+    border-left: 2px solid var(--text-muted);
+  }
   .section-header {
     display: flex;
     align-items: center;
