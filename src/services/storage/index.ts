@@ -6,8 +6,10 @@ export interface Quest {
   createdAt: number;
   completedAt?: number;
   dismissedAt?: number;
-  documentId: string; // Add document ID
-  documentPath: string; // Add document path for reference
+  documentId: string;
+  documentPath: string;
+  parentId?: string; // Add parent question ID for hierarchical questions
+  isParentQuestion?: boolean; // Flag to identify questions that have been broken down
 }
 
 export class StorageService {

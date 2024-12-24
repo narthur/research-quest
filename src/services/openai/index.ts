@@ -73,7 +73,7 @@ export class OpenAIService {
       ],
       [
         {
-          type: "function",
+          type: "function" as const,
           function: {
             name: "generate_questions",
             description:
@@ -128,7 +128,7 @@ ${questions.map((q) => `[${q.id}] ${q.question}`).join("\n")}`,
       ],
       [
         {
-          type: "function",
+          type: "function" as const,
           function: {
             name: "evaluate_questions",
             description:
@@ -167,6 +167,52 @@ ${questions.map((q) => `[${q.id}] ${q.question}`).join("\n")}`,
         },
       ]
     )) as EvaluateQuestionsResponse;
+  }
+
+  async breakdownQuestion(text: string, question: string): Promise<string[]> {
+    const result = await this.chat(
+      [
+        {
+          role: "system",
+          content:
+            "You are a research assistant helping to break down complex research questions into more specific, focused sub-questions.",
+        },
+        {
+          role: "user",
+          content: `Given this research question: "${question}"
+
+And this context text:
+${text}
+
+Generate 3-5 more specific sub-questions that would help answer the main question. These should be more focused and specific than the parent question.`,
+        },
+      ],
+      [
+        {
+          type: "function" as const,
+          function: {
+            name: "generate_sub_questions",
+            description: "Generate more specific sub-questions that help break down a broader research question",
+            parameters: {
+              type: "object",
+              properties: {
+                questions: {
+                  type: "array",
+                  description: "Array of more specific sub-questions",
+                  items: {
+                    type: "string",
+                    description: "A specific sub-question",
+                  },
+                },
+              },
+              required: ["questions"],
+            },
+          },
+        },
+      ]
+    );
+
+    return result.questions;
   }
 }
 

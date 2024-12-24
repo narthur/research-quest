@@ -57,6 +57,55 @@
   }
 
   $: activeFile = plugin.app.workspace.getActiveFile()?.path || "No file open";
+  async function breakdownQuest(quest: Quest) {
+    if (!plugin.openai) {
+      console.error("OpenAI API key not configured");
+      return;
+    }
+
+    const activeFile = plugin.app.workspace.getActiveFile();
+    if (!activeFile) {
+      return;
+    }
+
+    isLoading = true;
+    try {
+      const fileContent = await plugin.app.vault.read(activeFile);
+      const subQuestions = await plugin.openai.breakdownQuestion(fileContent, quest.question);
+      
+      // Create new quests for sub-questions
+      const newQuests = subQuestions.map(question => ({
+        id: crypto.randomUUID(),
+        question,
+        isCompleted: false,
+        isDismissed: false,
+        createdAt: Date.now(),
+        documentId: activeFile.path,
+        documentPath: activeFile.path,
+        parentId: quest.id,
+      }));
+
+      // Mark the original quest as a parent
+      const updatedQuests = quests.map(q => {
+        if (q.id === quest.id) {
+          return {
+            ...q,
+            isParentQuestion: true,
+          };
+        }
+        return q;
+      });
+
+      // Save all quests
+      await plugin.storage.saveQuests([...updatedQuests, ...newQuests]);
+      quests = [...updatedQuests, ...newQuests];
+    } catch (error) {
+      console.error('Error breaking down quest:', error);
+    } finally {
+      isLoading = false;
+    }
+  }
+
   async function dismissQuest(questId: string) {
     const updatedQuests = quests.map((q) => {
       if (q.id === questId) {
@@ -72,7 +121,13 @@
     quests = updatedQuests;
   }
 
-  $: activeQuests = quests.filter((q) => !q.isCompleted && !q.isDismissed);
+  $: activeQuests = quests.filter((q) => !q.isCompleted && !q.isDismissed)
+    .sort((a, b) => {
+      // Sort parent questions before their children
+      if (a.parentId && !b.parentId) return 1;
+      if (!a.parentId && b.parentId) return -1;
+      return 0;
+    });
   $: completedQuests = quests.filter((q) => q.isCompleted && !q.isDismissed);
   $: dismissedQuests = quests.filter((q) => q.isDismissed);
   $: hasOpenAIKey = !!plugin.openai;
@@ -126,15 +181,25 @@
     <h4>Active Quests</h4>
     <div class="quest-list-content">
       {#each activeQuests as quest}
-        <div class="quest-item">
+        <div class="quest-item {quest.isParentQuestion ? 'parent-question' : ''} {quest.parentId ? 'sub-question' : ''}">
           <span>{quest.question}</span>
-          <button 
-            class="dismiss-button" 
-            on:click={() => dismissQuest(quest.id)}
-            aria-label="Dismiss question"
-          >
-            ✕
-          </button>
+          <div class="quest-actions">
+            <button 
+              class="action-button"
+              on:click={() => breakdownQuest(quest)}
+              aria-label="Break down into sub-questions"
+              title="Break down into sub-questions"
+            >
+              ↳
+            </button>
+            <button 
+              class="dismiss-button" 
+              on:click={() => dismissQuest(quest.id)}
+              aria-label="Dismiss question"
+            >
+              ✕
+            </button>
+          </div>
         </div>
       {/each}
     </div>
@@ -259,24 +324,41 @@
     gap: 0.5rem;
   }
 
-  .dismiss-button {
+  .quest-actions {
+    display: flex;
+    gap: 0.25rem;
     opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .quest-item:hover .quest-actions {
+    opacity: 1;
+  }
+
+  .action-button,
+  .dismiss-button {
     background: none;
     border: none;
     color: var(--text-muted);
     cursor: pointer;
     padding: 4px;
     border-radius: 4px;
-    transition: opacity 0.2s ease;
   }
 
-  .quest-item:hover .dismiss-button {
-    opacity: 1;
-  }
-
+  .action-button:hover,
   .dismiss-button:hover {
     background-color: var(--background-modifier-hover);
     color: var(--text-normal);
+  }
+
+  .quest-item.parent-question {
+    border-left: 2px solid var(--interactive-accent);
+    padding-left: 0.75rem;
+  }
+
+  .quest-item.sub-question {
+    margin-left: 1rem;
+    font-size: 0.95em;
   }
 
   .quest-item:hover {
