@@ -4,14 +4,17 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'New version number (e.g., 1.0.1)'
+        description: "New version number (e.g., 1.0.1)"
         required: true
         type: string
+
+permissions:
+  contents: write
 
 jobs:
   bump-version:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v3
         with:
