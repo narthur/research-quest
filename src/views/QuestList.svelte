@@ -153,7 +153,7 @@
 
       if (newQuestions.length === 0) return;
 
-      const contextSnapshot = extractContext(fileContent, newQuestions[0]);
+      const contextSnapshot = await extractContext(fileContent, newQuestions[0], plugin.openai);
       const updatedQuests = quests.map((q) => {
         if (q.id === quest.id) {
           return {
