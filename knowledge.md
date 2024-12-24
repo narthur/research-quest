@@ -50,3 +50,16 @@ An Obsidian plugin that helps users deepen their research by generating intellig
 
 - [Obsidian Developer Docs](https://docs.obsidian.md/Home)
 - [OpenAI Function Calling](https://platform.openai.com/docs/guides/function-calling)
+
+## Future Enhancement Ideas
+
+- Progress tracking and visualization
+- Question organization with tags and grouping
+- Export/import functionality for sharing
+- Enhanced AI features (gap analysis, cross-reference)
+- Collaboration features for team research
+- Deeper Obsidian integration (graph view, links)
+- Research workflow tools
+- UI improvements (drag-drop, search)
+- Smart features (outdated detection, dependencies)
+- Quality control system

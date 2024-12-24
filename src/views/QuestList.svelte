@@ -3,6 +3,7 @@
   import type { Quest } from "../services/storage";
   import { onMount } from "svelte";
   import generateNewQuests from "../generateNewQuests.js";
+  import { Notice } from "obsidian";
 
   export let plugin: ResearchQuest;
 
@@ -124,6 +125,19 @@
     quests = updatedQuests;
   }
 
+  async function copyActiveQuestsAsMarkdown() {
+    const markdown = activeQuests
+      .map((q) => {
+        // Add indentation for sub-questions
+        const indent = q.parentId ? "    " : "";
+        return `${indent}- ${q.question}`;
+      })
+      .join("\n");
+
+    await navigator.clipboard.writeText(markdown);
+    new Notice("Copied questions to clipboard");
+  }
+
   $: activeQuests = quests
     .filter((q) => !q.isCompleted && !q.isDismissed)
     .sort((a, b) => {
@@ -132,6 +146,7 @@
       if (!a.parentId && b.parentId) return -1;
       return 0;
     });
+  $: hasActiveQuests = activeQuests.length > 0;
   $: completedQuests = quests.filter((q) => q.isCompleted && !q.isDismissed);
   $: dismissedQuests = quests.filter((q) => q.isDismissed);
   $: hasOpenAIKey = !!plugin.openai;
@@ -197,7 +212,19 @@
   </div>
 
   <div class="quest-section">
-    <h4>Active Quests</h4>
+    <div class="section-header">
+      <h4>Active Quests</h4>
+      {#if hasActiveQuests}
+        <button
+          class="copy-button"
+          on:click={copyActiveQuestsAsMarkdown}
+          title="Copy as markdown"
+          aria-label="Copy questions as markdown"
+        >
+          📋
+        </button>
+      {/if}
+    </div>
     <div class="quest-list-content">
       {#each activeQuests as quest}
         <div
@@ -254,6 +281,33 @@
 </div>
 
 <style>
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .section-header h4 {
+    margin: 0;
+  }
+
+  .copy-button {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    opacity: 0.7;
+  }
+
+  .copy-button:hover {
+    background-color: var(--background-modifier-hover);
+    opacity: 1;
+  }
+
   .quest-stats {
     display: flex;
     justify-content: space-around;
