@@ -3,6 +3,7 @@ import { QuestList, VIEW_TYPE_QUEST_LIST } from "./views/QuestList.js";
 import { Settings } from "./views/Settings.js";
 import { OpenAIService, createOpenAIService } from "./services/openai";
 import { StorageService } from "./services/storage";
+import { EventEmitter } from "./services/events";
 
 interface ResearchQuestSettings {
   OPENAI_API_KEY: string;
@@ -14,9 +15,11 @@ export default class ResearchQuest extends Plugin {
   settings: ResearchQuestSettings | undefined;
   openai: OpenAIService | undefined;
   storage!: StorageService;
+  events!: EventEmitter;
 
   async onload() {
     console.log("loading plugin");
+    this.events = new EventEmitter();
     this.storage = new StorageService(this);
 
     await this.loadSettings();
@@ -75,6 +78,8 @@ export default class ResearchQuest extends Plugin {
 
   async saveData(data: any): Promise<void> {
     console.log("saving data", data);
-    return super.saveData(data);
+    const result = await super.saveData(data);
+    this.events.emit('data-updated', data);
+    return result;
   }
 }

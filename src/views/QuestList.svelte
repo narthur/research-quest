@@ -26,6 +26,16 @@
 
   onMount(() => {
     loadQuests();
+    
+    // Listen for data updates
+    plugin.events.on('data-updated', () => {
+      loadQuests();
+    });
+
+    return () => {
+      // Clean up event listener
+      plugin.events.off('data-updated', loadQuests);
+    };
   });
 
   // Watch for changes in OpenAI service availability
