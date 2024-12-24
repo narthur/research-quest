@@ -14,15 +14,25 @@ interface EvaluateQuestionsResponse {
 }
 
 export class OpenAIService {
-  private client: OpenAI;
+  client: OpenAI;
   private model: string;
+  private settings: {
+    generatePrompt: string;
+    evaluatePrompt: string;
+    breakdownPrompt: string;
+  };
 
-  constructor(apiKey: string, model: string = "gpt-4") {
+  constructor(apiKey: string, model: string = "gpt-4", settings: {
+    generatePrompt: string;
+    evaluatePrompt: string;
+    breakdownPrompt: string;
+  }) {
     this.client = new OpenAI({
       apiKey: apiKey,
       dangerouslyAllowBrowser: true,
     });
     this.model = model;
+    this.settings = settings;
   }
 
   async complete(prompt: string): Promise<string> {
@@ -65,8 +75,7 @@ export class OpenAIService {
       [
         {
           role: "system",
-          content:
-            "You are a research assistant helping to generate focused research questions.",
+          content: this.settings.generatePrompt,
         },
         {
           role: "user",
@@ -114,12 +123,7 @@ export class OpenAIService {
       [
         {
           role: "system",
-          content: `You are a strict research assistant evaluating if questions have been thoroughly answered. 
-        Only mark a question as answered if the text provides a complete, clear answer with supporting evidence.
-        A question is NOT answered if:
-        - The answer is partial or incomplete
-        - The text only tangentially relates to the question
-        - The question requires information not present in the text`,
+          content: this.settings.evaluatePrompt,
         },
         {
           role: "user",
@@ -186,8 +190,7 @@ ${questions.map((q) => `[${q.id}] ${q.question}`).join("\n")}`,
       [
         {
           role: "system",
-          content:
-            "You are a research assistant helping to break down complex research questions into more specific, focused sub-questions.",
+          content: this.settings.breakdownPrompt,
         },
         {
           role: "user",
@@ -233,6 +236,10 @@ Generate 3-5 more specific sub-questions that would help answer the main questio
   }
 }
 
-export function createOpenAIService(apiKey: string, model: string = "gpt-4"): OpenAIService {
-  return new OpenAIService(apiKey, model);
+export function createOpenAIService(apiKey: string, model: string = "gpt-4", settings: {
+  generatePrompt: string;
+  evaluatePrompt: string;
+  breakdownPrompt: string;
+}): OpenAIService {
+  return new OpenAIService(apiKey, model, settings);
 }

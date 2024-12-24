@@ -8,6 +8,9 @@
 
   let apiKey = plugin.settings?.OPENAI_API_KEY || "";
   let model = plugin.settings?.MODEL || "gpt-4";
+  let generatePrompt = plugin.settings?.GENERATE_PROMPT || "";
+  let evaluatePrompt = plugin.settings?.EVALUATE_PROMPT || "";
+  let breakdownPrompt = plugin.settings?.BREAKDOWN_PROMPT || "";
   let models: string[] = [];
   let loading = false;
 
@@ -15,6 +18,9 @@
     if (plugin.settings) {
       plugin.settings.OPENAI_API_KEY = apiKey;
       plugin.settings.MODEL = model;
+      plugin.settings.GENERATE_PROMPT = generatePrompt;
+      plugin.settings.EVALUATE_PROMPT = evaluatePrompt;
+      plugin.settings.BREAKDOWN_PROMPT = breakdownPrompt;
       await plugin.saveSettings();
     }
   }
@@ -71,6 +77,57 @@
       bind:value={apiKey}
       on:change={saveSettings}
     />
+  </div>
+</div>
+
+<div class="setting-item">
+  <div class="setting-item-info">
+    <div class="setting-item-name">Generate Questions Prompt</div>
+    <div class="setting-item-description">
+      System prompt for generating research questions
+    </div>
+  </div>
+  <div class="setting-item-control">
+    <textarea
+      bind:value={generatePrompt}
+      on:change={saveSettings}
+      rows="3"
+      style="width: 100%;"
+    ></textarea>
+  </div>
+</div>
+
+<div class="setting-item">
+  <div class="setting-item-info">
+    <div class="setting-item-name">Evaluate Questions Prompt</div>
+    <div class="setting-item-description">
+      System prompt for evaluating if questions are answered
+    </div>
+  </div>
+  <div class="setting-item-control">
+    <textarea
+      bind:value={evaluatePrompt}
+      on:change={saveSettings}
+      rows="5"
+      style="width: 100%;"
+    ></textarea>
+  </div>
+</div>
+
+<div class="setting-item">
+  <div class="setting-item-info">
+    <div class="setting-item-name">Breakdown Questions Prompt</div>
+    <div class="setting-item-description">
+      System prompt for breaking down questions into sub-questions
+    </div>
+  </div>
+  <div class="setting-item-control">
+    <textarea
+      bind:value={breakdownPrompt}
+      on:change={saveSettings}
+      rows="3"
+      style="width: 100%;"
+    ></textarea>
   </div>
 </div>
 

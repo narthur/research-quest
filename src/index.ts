@@ -8,10 +8,21 @@ import { EventEmitter } from "./services/events";
 interface ResearchQuestSettings {
   OPENAI_API_KEY: string;
   MODEL: string;
+  GENERATE_PROMPT: string;
+  EVALUATE_PROMPT: string;
+  BREAKDOWN_PROMPT: string;
 }
 
 const DEFAULT_SETTINGS: Partial<ResearchQuestSettings> = {
-  MODEL: "gpt-4"
+  MODEL: "gpt-4",
+  GENERATE_PROMPT: "You are a research assistant helping to generate focused research questions.",
+  EVALUATE_PROMPT: `You are a strict research assistant evaluating if questions have been thoroughly answered. 
+Only mark a question as answered if the text provides a complete, clear answer with supporting evidence.
+A question is NOT answered if:
+- The answer is partial or incomplete
+- The text only tangentially relates to the question
+- The question requires information not present in the text`,
+  BREAKDOWN_PROMPT: "You are a research assistant helping to break down complex research questions into more specific, focused sub-questions."
 };
 
 export default class ResearchQuest extends Plugin {
@@ -49,14 +60,30 @@ export default class ResearchQuest extends Plugin {
   async loadSettings() {
     this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
     if (this.settings?.OPENAI_API_KEY) {
-      this.openai = createOpenAIService(this.settings.OPENAI_API_KEY, this.settings.MODEL);
+      this.openai = createOpenAIService(
+        this.settings.OPENAI_API_KEY, 
+        this.settings.MODEL,
+        {
+          generatePrompt: this.settings.GENERATE_PROMPT,
+          evaluatePrompt: this.settings.EVALUATE_PROMPT,
+          breakdownPrompt: this.settings.BREAKDOWN_PROMPT
+        }
+      );
     }
   }
 
   async saveSettings() {
     await this.saveData(this.settings);
     if (this.settings?.OPENAI_API_KEY) {
-      this.openai = createOpenAIService(this.settings.OPENAI_API_KEY, this.settings.MODEL);
+      this.openai = createOpenAIService(
+        this.settings.OPENAI_API_KEY, 
+        this.settings.MODEL,
+        {
+          generatePrompt: this.settings.GENERATE_PROMPT,
+          evaluatePrompt: this.settings.EVALUATE_PROMPT,
+          breakdownPrompt: this.settings.BREAKDOWN_PROMPT
+        }
+      );
     } else {
       this.openai = undefined;
     }
