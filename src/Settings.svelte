@@ -4,7 +4,7 @@
 
   export let plugin: ResearchQuest;
 
-  let apiKey = plugin.settings?.OPENAI_API_KEY || '';
+  let apiKey = plugin.settings?.OPENAI_API_KEY || "";
 
   async function saveSettings() {
     if (plugin.settings) {
@@ -22,7 +22,7 @@
     </div>
   </div>
   <div class="setting-item-control">
-    <input 
+    <input
       type="password"
       placeholder="sk-..."
       bind:value={apiKey}
