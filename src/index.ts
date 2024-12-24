@@ -1,6 +1,7 @@
 import { Plugin, WorkspaceLeaf } from "obsidian";
 import { ExampleView, VIEW_TYPE_EXAMPLE } from "./views/ExampleView.js";
 import { Settings } from "./views/Settings.js";
+import { OpenAIService, createOpenAIService } from "./services/openai";
 
 interface ResearchQuestSettings {
   OPENAI_API_KEY: string;
@@ -10,6 +11,7 @@ const DEFAULT_SETTINGS: Partial<ResearchQuestSettings> = {};
 
 export default class ResearchQuest extends Plugin {
   settings: ResearchQuestSettings | undefined;
+  openai: OpenAIService | undefined;
 
   async onload() {
     console.log("loading plugin");
@@ -27,10 +29,16 @@ export default class ResearchQuest extends Plugin {
 
   async loadSettings() {
     this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+    if (this.settings?.OPENAI_API_KEY) {
+      this.openai = createOpenAIService(this.settings.OPENAI_API_KEY);
+    }
   }
 
   async saveSettings() {
     await this.saveData(this.settings);
+    if (this.settings?.OPENAI_API_KEY) {
+      this.openai = createOpenAIService(this.settings.OPENAI_API_KEY);
+    }
   }
 
   async onunload() {
