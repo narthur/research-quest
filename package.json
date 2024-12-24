@@ -24,6 +24,7 @@
     "svelte": "^4.2.12",
     "svelte-preprocess": "^6.0.3",
     "tslib": "^2.8.1",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "openai": "^4.77.0"
   }
 }
