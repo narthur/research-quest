@@ -34,6 +34,14 @@ export default class ResearchQuest extends Plugin {
     this.addRibbonIcon("sparkles", "Activate view", () => {
       this.activateView();
     });
+
+    // Register event listener for active leaf changes
+    this.registerEvent(
+      this.app.workspace.on('active-leaf-change', () => {
+        // Emit an event that our QuestList component can listen to
+        this.events.emit('active-leaf-changed');
+      })
+    );
   }
 
   async loadSettings() {

@@ -26,15 +26,23 @@
 
   onMount(() => {
     loadQuests();
-    
+
     // Listen for data updates
-    plugin.events.on('data-updated', () => {
+    plugin.events.on("data-updated", () => {
+      loadQuests();
+    });
+
+    // Listen for active leaf changes
+    plugin.events.on("active-leaf-changed", () => {
+      activeFile =
+        plugin.app.workspace.getActiveFile()?.basename || "No file open";
       loadQuests();
     });
 
     return () => {
-      // Clean up event listener
-      plugin.events.off('data-updated', loadQuests);
+      // Clean up event listeners
+      plugin.events.off("data-updated", loadQuests);
+      plugin.events.off("active-leaf-changed", loadQuests);
     };
   });
 
@@ -46,8 +54,12 @@
   $: activeFile =
     plugin.app.workspace.getActiveFile()?.basename || "No file open";
   $: currentDocumentId = plugin.app.workspace.getActiveFile()?.path;
-  $: activeQuests = quests.filter((q) => !q.isCompleted && q.documentId === currentDocumentId);
-  $: completedQuests = quests.filter((q) => q.isCompleted && q.documentId === currentDocumentId);
+  $: activeQuests = quests.filter(
+    (q) => !q.isCompleted && q.documentId === currentDocumentId
+  );
+  $: completedQuests = quests.filter(
+    (q) => q.isCompleted && q.documentId === currentDocumentId
+  );
   $: hasOpenAIKey = !!plugin.openai;
 </script>
 
