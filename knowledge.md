@@ -63,3 +63,17 @@ An Obsidian plugin that helps users deepen their research by generating intellig
 - UI improvements (drag-drop, search)
 - Smart features (outdated detection, dependencies)
 - Quality control system
+
+## Obsolescence Detection Pattern
+
+Track question relevance by:
+- Store content hash with each question
+- Keep minimal context snapshot
+- Regular validation checks
+- AI-assisted relevance evaluation
+
+When obsolete:
+1. Flag for review
+2. Offer regeneration
+3. Move to review queue
+4. Allow manual revalidation
