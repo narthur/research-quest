@@ -105,8 +105,6 @@ Return false if:
 
       await plugin.storage.saveQuests(updated);
     }
-
-    await plugin.storage.saveQuests(quests);
   } catch (error) {
     console.error("Error refreshing quests:", error);
   }

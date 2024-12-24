@@ -18,7 +18,8 @@
 
   function handleRefresh() {
     isLoading = true;
-    generateNewQuests(plugin).then(() => {
+    generateNewQuests(plugin).finally(() => {
+      loadQuests();
       isLoading = false;
     });
   }

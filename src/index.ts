@@ -23,7 +23,10 @@ export default class ResearchQuest extends Plugin {
 
     this.addSettingTab(new Settings(this.app, this));
 
-    this.registerView(VIEW_TYPE_QUEST_LIST, (leaf) => new QuestList(leaf, this));
+    this.registerView(
+      VIEW_TYPE_QUEST_LIST,
+      (leaf) => new QuestList(leaf, this)
+    );
 
     this.addRibbonIcon("sparkles", "Activate view", () => {
       this.activateView();
@@ -68,5 +71,10 @@ export default class ResearchQuest extends Plugin {
 
     // "Reveal" the leaf in case it is in a collapsed sidebar
     if (leaf) workspace.revealLeaf(leaf);
+  }
+
+  async saveData(data: any): Promise<void> {
+    console.log("saving data", data);
+    return super.saveData(data);
   }
 }
