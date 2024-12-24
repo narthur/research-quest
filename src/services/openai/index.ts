@@ -15,12 +15,14 @@ interface EvaluateQuestionsResponse {
 
 export class OpenAIService {
   private client: OpenAI;
+  private model: string;
 
-  constructor(apiKey: string) {
+  constructor(apiKey: string, model: string = "gpt-4") {
     this.client = new OpenAI({
       apiKey: apiKey,
       dangerouslyAllowBrowser: true,
     });
+    this.model = model;
   }
 
   async complete(prompt: string): Promise<string> {
@@ -43,7 +45,7 @@ export class OpenAIService {
     | ChatCompletion.Choice["message"]
   > {
     const response = await this.client.chat.completions.create({
-      model: "gpt-4o",
+      model: this.model,
       messages,
       tools: tools,
       temperature: 0.7,
@@ -231,6 +233,6 @@ Generate 3-5 more specific sub-questions that would help answer the main questio
   }
 }
 
-export function createOpenAIService(apiKey: string): OpenAIService {
-  return new OpenAIService(apiKey);
+export function createOpenAIService(apiKey: string, model: string = "gpt-4"): OpenAIService {
+  return new OpenAIService(apiKey, model);
 }

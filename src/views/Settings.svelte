@@ -7,11 +7,33 @@
   export let plugin: ResearchQuest;
 
   let apiKey = plugin.settings?.OPENAI_API_KEY || "";
+  let model = plugin.settings?.MODEL || "gpt-4";
+  let models: string[] = [];
+  let loading = false;
 
   async function saveSettings() {
     if (plugin.settings) {
       plugin.settings.OPENAI_API_KEY = apiKey;
+      plugin.settings.MODEL = model;
       await plugin.saveSettings();
+    }
+  }
+
+  async function loadModels() {
+    if (!plugin.openai) return;
+    
+    loading = true;
+    try {
+      const response = await plugin.openai.client.models.list();
+      models = response.data
+        .map(m => m.id)
+        .filter(id => id.startsWith('gpt'))
+        .sort();
+    } catch (error) {
+      console.error('Failed to load models:', error);
+      new Notice('Failed to load available models');
+    } finally {
+      loading = false;
     }
   }
 
@@ -29,6 +51,10 @@
     });
     modal.open();
   }
+
+  $: if (plugin.openai) {
+    loadModels();
+  }
 </script>
 
 <div class="setting-item">
@@ -45,6 +71,25 @@
       bind:value={apiKey}
       on:change={saveSettings}
     />
+  </div>
+</div>
+
+<div class="setting-item">
+  <div class="setting-item-info">
+    <div class="setting-item-name">Model</div>
+    <div class="setting-item-description">
+      Select the OpenAI model to use
+    </div>
+  </div>
+  <div class="setting-item-control">
+    <select bind:value={model} on:change={saveSettings} disabled={loading}>
+      {#each models as modelOption}
+        <option value={modelOption}>{modelOption}</option>
+      {/each}
+    </select>
+    {#if loading}
+      <span>Loading models...</span>
+    {/if}
   </div>
 </div>
 

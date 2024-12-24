@@ -7,9 +7,12 @@ import { EventEmitter } from "./services/events";
 
 interface ResearchQuestSettings {
   OPENAI_API_KEY: string;
+  MODEL: string;
 }
 
-const DEFAULT_SETTINGS: Partial<ResearchQuestSettings> = {};
+const DEFAULT_SETTINGS: Partial<ResearchQuestSettings> = {
+  MODEL: "gpt-4"
+};
 
 export default class ResearchQuest extends Plugin {
   settings: ResearchQuestSettings | undefined;
@@ -46,14 +49,14 @@ export default class ResearchQuest extends Plugin {
   async loadSettings() {
     this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
     if (this.settings?.OPENAI_API_KEY) {
-      this.openai = createOpenAIService(this.settings.OPENAI_API_KEY);
+      this.openai = createOpenAIService(this.settings.OPENAI_API_KEY, this.settings.MODEL);
     }
   }
 
   async saveSettings() {
     await this.saveData(this.settings);
     if (this.settings?.OPENAI_API_KEY) {
-      this.openai = createOpenAIService(this.settings.OPENAI_API_KEY);
+      this.openai = createOpenAIService(this.settings.OPENAI_API_KEY, this.settings.MODEL);
     } else {
       this.openai = undefined;
     }
