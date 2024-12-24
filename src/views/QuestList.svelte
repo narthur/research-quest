@@ -16,10 +16,7 @@
   }
 
   async function loadQuests() {
-    const storage = plugin.storage;
-    if (storage) {
-      quests = await storage.getQuestsForDocument(activeFile);
-    }
+    quests = await plugin.storage.getQuestsForDocument(activeFile);
   }
 
   function handleRefresh() {
@@ -71,10 +68,13 @@
     isLoading = true;
     try {
       const fileContent = await plugin.app.vault.read(activeFile);
-      const subQuestions = await plugin.openai.breakdownQuestion(fileContent, quest.question);
-      
+      const subQuestions = await plugin.openai.breakdownQuestion(
+        fileContent,
+        quest.question
+      );
+
       // Create new quests for sub-questions
-      const newQuests = subQuestions.map(question => ({
+      const newQuests = subQuestions.map((question) => ({
         id: crypto.randomUUID(),
         question,
         isCompleted: false,
@@ -86,7 +86,7 @@
       }));
 
       // Mark the original quest as a parent
-      const updatedQuests = quests.map(q => {
+      const updatedQuests = quests.map((q) => {
         if (q.id === quest.id) {
           return {
             ...q,
@@ -100,7 +100,7 @@
       await plugin.storage.saveQuests([...updatedQuests, ...newQuests]);
       quests = [...updatedQuests, ...newQuests];
     } catch (error) {
-      console.error('Error breaking down quest:', error);
+      console.error("Error breaking down quest:", error);
     } finally {
       isLoading = false;
     }
@@ -121,7 +121,8 @@
     quests = updatedQuests;
   }
 
-  $: activeQuests = quests.filter((q) => !q.isCompleted && !q.isDismissed)
+  $: activeQuests = quests
+    .filter((q) => !q.isCompleted && !q.isDismissed)
     .sort((a, b) => {
       // Sort parent questions before their children
       if (a.parentId && !b.parentId) return 1;
@@ -196,10 +197,14 @@
     <h4>Active Quests</h4>
     <div class="quest-list-content">
       {#each activeQuests as quest}
-        <div class="quest-item {quest.isParentQuestion ? 'parent-question' : ''} {quest.parentId ? 'sub-question' : ''}">
+        <div
+          class="quest-item {quest.isParentQuestion
+            ? 'parent-question'
+            : ''} {quest.parentId ? 'sub-question' : ''}"
+        >
           <span>{quest.question}</span>
           <div class="quest-actions">
-            <button 
+            <button
               class="action-button"
               on:click={() => breakdownQuest(quest)}
               aria-label="Break down into sub-questions"
@@ -207,8 +212,8 @@
             >
               ↳
             </button>
-            <button 
-              class="dismiss-button" 
+            <button
+              class="dismiss-button"
               on:click={() => dismissQuest(quest.id)}
               aria-label="Dismiss question"
             >
