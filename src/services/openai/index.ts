@@ -23,6 +23,7 @@ export class OpenAIService {
   constructor(apiKey: string) {
     this.client = new OpenAI({
       apiKey: apiKey,
+      dangerouslyAllowBrowser: true,
     });
   }
 
@@ -39,17 +40,19 @@ export class OpenAIService {
 
   async chat(
     messages: { role: "system" | "user" | "assistant"; content: string }[],
-    functions?: any
+    tools?: OpenAI.Chat.Completions.ChatCompletionTool[] | undefined
   ): Promise<any> {
     const response = await this.client.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages,
-      functions: functions,
-      function_call: functions ? { name: functions[0].name } : undefined,
+      tools: tools,
       temperature: 0.7,
     });
 
     const choice = response.choices[0];
+
+    console.log({ choice });
+
     if (choice.finish_reason === "tool_calls" && choice.message.tool_calls) {
       return JSON.parse(choice.message.tool_calls[0].function.arguments);
     }
@@ -58,27 +61,6 @@ export class OpenAIService {
   }
 
   async generateQuestions(text: string, count: number): Promise<string[]> {
-    const functions = [
-      {
-        name: "generate_questions",
-        description: "Generate research questions based on the provided text",
-        parameters: {
-          type: "object",
-          properties: {
-            questions: {
-              type: "array",
-              description: "Array of research questions",
-              items: {
-                type: "string",
-                description: "A specific research question",
-              },
-            },
-          },
-          required: ["questions"],
-        },
-      },
-    ];
-
     const result = (await this.chat(
       [
         {
@@ -91,8 +73,33 @@ export class OpenAIService {
           content: `Given the following text, generate ${count} specific research questions that would help deepen understanding of the topic:\n\n${text}`,
         },
       ],
-      functions
+      [
+        {
+          type: "function",
+          function: {
+            name: "generate_questions",
+            description:
+              "Generate research questions based on the provided text",
+            parameters: {
+              type: "object",
+              properties: {
+                questions: {
+                  type: "array",
+                  description: "Array of research questions",
+                  items: {
+                    type: "string",
+                    description: "A specific research question",
+                  },
+                },
+              },
+              required: ["questions"],
+            },
+          },
+        },
+      ]
     )) as GenerateQuestionsResponse;
+
+    console.log({ result });
 
     return result.questions;
   }
@@ -101,44 +108,6 @@ export class OpenAIService {
     text: string,
     questions: { id: string; question: string }[]
   ): Promise<EvaluateQuestionsResponse> {
-    const functions = [
-      {
-        name: "evaluate_questions",
-        description:
-          "Evaluate if research questions have been answered in the text",
-        parameters: {
-          type: "object",
-          properties: {
-            evaluations: {
-              type: "array",
-              description: "Array of question evaluations",
-              items: {
-                type: "object",
-                properties: {
-                  questionId: {
-                    type: "string",
-                    description: "ID of the question being evaluated",
-                  },
-                  isAnswered: {
-                    type: "boolean",
-                    description:
-                      "Whether the question is fully answered in the text",
-                  },
-                  explanation: {
-                    type: "string",
-                    description:
-                      "Brief explanation of why the question is considered answered or not",
-                  },
-                },
-                required: ["questionId", "isAnswered", "explanation"],
-              },
-            },
-          },
-          required: ["evaluations"],
-        },
-      },
-    ];
-
     return (await this.chat(
       [
         {
@@ -161,7 +130,46 @@ Questions to evaluate:
 ${questions.map((q) => `[${q.id}] ${q.question}`).join("\n")}`,
         },
       ],
-      functions
+      [
+        {
+          type: "function",
+          function: {
+            name: "evaluate_questions",
+            description:
+              "Evaluate if research questions have been answered in the text",
+            parameters: {
+              type: "object",
+              properties: {
+                evaluations: {
+                  type: "array",
+                  description: "Array of question evaluations",
+                  items: {
+                    type: "object",
+                    properties: {
+                      questionId: {
+                        type: "string",
+                        description: "ID of the question being evaluated",
+                      },
+                      isAnswered: {
+                        type: "boolean",
+                        description:
+                          "Whether the question is fully answered in the text",
+                      },
+                      explanation: {
+                        type: "string",
+                        description:
+                          "Brief explanation of why the question is considered answered or not",
+                      },
+                    },
+                    required: ["questionId", "isAnswered", "explanation"],
+                  },
+                },
+              },
+              required: ["evaluations"],
+            },
+          },
+        },
+      ]
     )) as EvaluateQuestionsResponse;
   }
 }
