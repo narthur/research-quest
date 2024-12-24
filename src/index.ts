@@ -1,6 +1,6 @@
 import { Plugin, WorkspaceLeaf } from "obsidian";
-import { ExampleView, VIEW_TYPE_EXAMPLE } from "./ExampleView.js";
-import { Settings } from "./Settings.js";
+import { ExampleView, VIEW_TYPE_EXAMPLE } from "./views/ExampleView.js";
+import { Settings } from "./views/Settings.js";
 
 interface ResearchQuestSettings {
   OPENAI_API_KEY: string;

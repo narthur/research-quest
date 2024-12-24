@@ -1,5 +1,5 @@
 import { App, PluginSettingTab } from "obsidian";
-import type ResearchQuest from "./index";
+import type ResearchQuest from "../index";
 import SettingsComponent from "./Settings.svelte";
 
 export class Settings extends PluginSettingTab {

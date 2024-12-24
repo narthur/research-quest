@@ -1,6 +1,6 @@
 import { ItemView, WorkspaceLeaf } from "obsidian";
 
-import Component from "./Component.svelte";
+import Component from "../Component.svelte";
 
 export const VIEW_TYPE_EXAMPLE = "example-view";
 
