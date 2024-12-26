@@ -10,7 +10,8 @@
     "version": "node version-bump.mjs && git add manifest.json versions.json",
     "lint": "eslint .",
     "checkTs": "svelte-check",
-    "validate": "npm run lint && npm run checkTs && npm run test -- --run"
+    "validate": "npm run lint && npm run checkTs && npm run test -- --run",
+    "knip": "knip"
   },
   "keywords": [],
   "author": "",
@@ -26,6 +27,7 @@
     "esbuild-svelte": "^0.9.0",
     "eslint": "^9.17.0",
     "globals": "^15.14.0",
+    "knip": "^5.41.1",
     "obsidian": "^1.7.2",
     "openai": "^4.77.0",
     "svelte": "^4.2.12",

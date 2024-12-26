@@ -11,10 +11,12 @@ interface ResearchQuestSettings {
   GENERATE_PROMPT: string;
   EVALUATE_PROMPT: string;
   BREAKDOWN_PROMPT: string;
+  SEARCH_ENGINE: "google" | "bing" | "duckduckgo" | "perplexity";
 }
 
 export const DEFAULT_SETTINGS: Omit<ResearchQuestSettings, "OPENAI_API_KEY"> = {
   MODEL: "gpt-4",
+  SEARCH_ENGINE: "google",
   GENERATE_PROMPT:
     `You are a research assistant helping to generate focused research questions. Your questions must be concise and specific.
 

@@ -1,5 +1,8 @@
 <script lang="ts">
   import type { Quest } from "../../services/storage";
+  import type ResearchQuest from "../../index";
+
+  export let plugin: ResearchQuest;
 
   export let title: string;
   export let quests: Quest[];
@@ -43,15 +46,34 @@
           </div>
           {#if type === "active" || type === "obsolete"}
             <div class="quest-actions">
-              {#if type === "active" && onBreakdown}
+              {#if type === "active"}
                 <button
                   class="action-button"
-                  on:click={() => onBreakdown(quest)}
-                  aria-label="Break down into sub-questions"
-                  title="Break down into sub-questions"
+                  on:click={() => {
+                    const searchUrls = {
+                      google: `https://www.google.com/search?q=`,
+                      bing: `https://www.bing.com/search?q=`,
+                      duckduckgo: `https://duckduckgo.com/?q=`,
+                      perplexity: `https://www.perplexity.ai/?q=`,
+                    };
+                    const baseUrl = searchUrls[plugin.settings?.SEARCH_ENGINE || 'google'];
+                    window.open(baseUrl + encodeURIComponent(quest.question), '_blank');
+                  }}
+                  aria-label="Search on Google"
+                  title="Search on Google"
                 >
-                  ↳
+                  🔍
                 </button>
+                {#if onBreakdown}
+                  <button
+                    class="action-button"
+                    on:click={() => onBreakdown(quest)}
+                    aria-label="Break down into sub-questions"
+                    title="Break down into sub-questions"
+                  >
+                    ↳
+                  </button>
+                {/if}
               {/if}
               {#if type === "obsolete" && onRegenerate}
                 <button
@@ -159,6 +181,12 @@
   .copy-button:hover {
     background-color: var(--background-modifier-hover);
     color: var(--text-normal);
+  }
+
+  /* Make search button more prominent */
+  .action-button[title="Search on Google"]:hover {
+    background-color: var(--interactive-accent);
+    color: var(--text-on-accent);
   }
 
   .copy-button {

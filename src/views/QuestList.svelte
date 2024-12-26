@@ -239,24 +239,25 @@
       type="obsolete"
       onDismiss={dismissQuest}
       onRegenerate={regenerateQuest}
+      {plugin}
     />
-  {/if}
-
-  <QuestSection
-    title="Active Quests"
-    quests={activeQuests}
-    type="active"
-    onDismiss={dismissQuest}
-    onBreakdown={breakdownQuest}
-    showCopyButton={hasActiveQuests}
-    onCopy={copyActiveQuestsAsMarkdown}
-  />
+  {/if}    <QuestSection
+      title="Active Quests"
+      quests={activeQuests}
+      type="active"
+      onDismiss={dismissQuest}
+      onBreakdown={breakdownQuest}
+      showCopyButton={hasActiveQuests}
+      onCopy={copyActiveQuestsAsMarkdown}
+      {plugin}
+    />
 
   <QuestSection
     title="Completed Quests"
     quests={completedQuests}
     type="completed"
     onDismiss={dismissQuest}
+    {plugin}
   />
 
   {#if dismissedQuests.length > 0}
@@ -265,6 +266,7 @@
       quests={dismissedQuests}
       type="dismissed"
       onDismiss={dismissQuest}
+      {plugin}
     />
   {/if}
 </div>

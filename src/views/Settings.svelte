@@ -9,6 +9,7 @@
 
   let apiKey = plugin.settings?.OPENAI_API_KEY || "";
   let model = plugin.settings?.MODEL || "gpt-4";
+  let searchEngine = plugin.settings?.SEARCH_ENGINE || "google";
   let generatePrompt = plugin.settings?.GENERATE_PROMPT || "";
   let evaluatePrompt = plugin.settings?.EVALUATE_PROMPT || "";
   let breakdownPrompt = plugin.settings?.BREAKDOWN_PROMPT || "";
@@ -19,6 +20,7 @@
     if (plugin.settings) {
       plugin.settings.OPENAI_API_KEY = apiKey;
       plugin.settings.MODEL = model;
+      plugin.settings.SEARCH_ENGINE = searchEngine;
       plugin.settings.GENERATE_PROMPT = generatePrompt;
       plugin.settings.EVALUATE_PROMPT = evaluatePrompt;
       plugin.settings.BREAKDOWN_PROMPT = breakdownPrompt;
@@ -163,6 +165,21 @@
     {#if loading}
       <span>Loading models...</span>
     {/if}
+  </div>
+</div>
+
+<div class="setting-item">
+  <div class="setting-item-info">
+    <div class="setting-item-name">Search Engine</div>
+    <div class="setting-item-description">Choose which search engine to use for question searches</div>
+  </div>
+  <div class="setting-item-control">
+    <select bind:value={searchEngine} on:change={saveSettings}>
+      <option value="google">Google</option>
+      <option value="bing">Bing</option>
+      <option value="duckduckgo">DuckDuckGo</option>
+      <option value="perplexity">Perplexity</option>
+    </select>
   </div>
 </div>
 
