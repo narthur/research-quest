@@ -31,10 +31,12 @@
   <div class="quest-list-content {type}">
     {#if quests.length > 0}
       {#each quests as quest}
-        <div 
-          class="quest-item {type} {quest.isParentQuestion ? 'parent-question' : ''} {quest.parentId ? 'sub-question' : ''}"
-          class:completed={type === 'completed'}
-          class:obsolete={type === 'obsolete'}
+        <div
+          class="quest-item {type} {quest.isParentQuestion
+            ? 'parent-question'
+            : ''} {quest.parentId ? 'sub-question' : ''}"
+          class:completed={type === "completed"}
+          class:obsolete={type === "obsolete"}
         >
           <div class="quest-content">
             <span>{quest.question}</span>
@@ -56,8 +58,12 @@
                       duckduckgo: `https://duckduckgo.com/?q=`,
                       perplexity: `https://www.perplexity.ai/?q=`,
                     };
-                    const baseUrl = searchUrls[plugin.settings?.SEARCH_ENGINE || 'google'];
-                    window.open(baseUrl + encodeURIComponent(quest.question), '_blank');
+                    const baseUrl =
+                      searchUrls[plugin.settings?.SEARCH_ENGINE || "google"];
+                    window.open(
+                      baseUrl + encodeURIComponent(quest.question),
+                      "_blank"
+                    );
                   }}
                   aria-label="Search on Google"
                   title="Search on Google"
@@ -98,7 +104,9 @@
       {/each}
     {:else if type === "active"}
       <div class="empty-state">
-        <p class="empty-text">Click refresh to generate research questions for this document</p>
+        <p class="empty-text">
+          Click refresh to generate research questions for this document
+        </p>
       </div>
     {:else if type === "obsolete"}
       <div class="empty-state">
@@ -135,10 +143,7 @@
     padding: 0.5rem;
     border-radius: 4px;
     background-color: var(--background-secondary);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 0.5rem;
+    position: relative; /* For absolute positioning of actions */
     transition: background-color 0.2s ease;
   }
 
@@ -150,18 +155,39 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    flex: 1;
   }
 
   .quest-actions {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
     display: flex;
     gap: 0.25rem;
     opacity: 0;
     transition: opacity 0.2s ease;
+    background-color: var(--background-secondary);
+    padding: 0 0.25rem;
+    border-radius: 4px;
   }
 
   .quest-item:hover .quest-actions {
     opacity: 1;
+  }
+
+  /* Fade out text behind actions */
+  .quest-item:hover .quest-content::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 6rem;
+    background: linear-gradient(
+      to right,
+      transparent,
+      var(--background-secondary)
+    );
   }
 
   .action-button,
@@ -173,7 +199,9 @@
     cursor: pointer;
     padding: 4px;
     border-radius: 4px;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease;
   }
 
   .action-button:hover,
@@ -233,7 +261,7 @@
     font-style: italic;
     background-color: var(--background-secondary);
     border-radius: 4px;
-    position: relative;  /* Instead of absolute */
+    position: relative; /* Instead of absolute */
     margin: 0.5rem 0;
   }
 
