@@ -181,10 +181,20 @@
   $: activeQuests = quests
     .filter((q) => !q.isCompleted && !q.isDismissed && !q.isObsolete)
     .sort((a, b) => {
-      // Sort parent questions before their children
-      if (a.parentId && !b.parentId) return 1;
-      if (!a.parentId && b.parentId) return -1;
-      return 0;
+      // Keep questions with same parent together
+      if (a.parentId !== b.parentId) {
+        // If one has a parent and other doesn't
+        if (!a.parentId && b.parentId) return -1;
+        if (a.parentId && !b.parentId) return 1;
+        // Different parents - sort by parent's position
+        if (a.parentId && b.parentId) {
+          const aParentIndex = quests.findIndex(q => q.id === a.parentId);
+          const bParentIndex = quests.findIndex(q => q.id === b.parentId);
+          return aParentIndex - bParentIndex;
+        }
+      }
+      // Same parent (or both root) - sort by creation time
+      return a.createdAt - b.createdAt;
     });
   $: hasActiveQuests = activeQuests.length > 0;
   $: completedQuests = quests.filter((q) => q.isCompleted && !q.isDismissed);
