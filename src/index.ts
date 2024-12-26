@@ -123,6 +123,7 @@ export default class ResearchQuest extends Plugin {
     // TODO: Implement onunload
   }
 
+
   async activateView() {
     const { workspace } = this.app;
 

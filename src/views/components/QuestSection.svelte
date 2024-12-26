@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { Notice } from "obsidian";
   import type { Quest } from "../../services/storage";
   import type ResearchQuest from "../../index";
 
@@ -49,27 +50,40 @@
           {#if type === "active" || type === "obsolete"}
             <div class="quest-actions">
               {#if type === "active"}
-                <button
-                  class="action-button"
-                  on:click={() => {
-                    const searchUrls = {
-                      google: `https://www.google.com/search?q=`,
-                      bing: `https://www.bing.com/search?q=`,
-                      duckduckgo: `https://duckduckgo.com/?q=`,
-                      perplexity: `https://www.perplexity.ai/?q=`,
-                    };
-                    const baseUrl =
-                      searchUrls[plugin.settings?.SEARCH_ENGINE || "google"];
-                    window.open(
-                      baseUrl + encodeURIComponent(quest.question),
-                      "_blank"
-                    );
-                  }}
-                  aria-label="Search on Google"
-                  title="Search on Google"
-                >
-                  🔍
-                </button>
+                <div class="action-group">
+                  <button
+                    class="action-button"
+                    on:click={() => {
+                      const searchUrls = {
+                        google: `https://www.google.com/search?q=`,
+                        bing: `https://www.bing.com/search?q=`,
+                        duckduckgo: `https://duckduckgo.com/?q=`,
+                        perplexity: `https://www.perplexity.ai/?q=`,
+                      };
+                      const baseUrl =
+                        searchUrls[plugin.settings?.SEARCH_ENGINE || "google"];
+                      window.open(
+                        baseUrl + encodeURIComponent(quest.question),
+                        "_blank"
+                      );
+                    }}
+                    aria-label="Search on Google"
+                    title="Search on Google"
+                  >
+                    🔍
+                  </button>
+                  <button
+                    class="action-button"
+                    on:click={async () => {
+                      await navigator.clipboard.writeText(quest.question);
+                      new Notice("Copied question to clipboard");
+                    }}
+                    aria-label="Copy question"
+                    title="Copy question"
+                  >
+                    📋
+                  </button>
+                </div>
                 {#if onBreakdown}
                   <button
                     class="action-button"
@@ -169,6 +183,12 @@
     background-color: var(--background-secondary);
     padding: 0 0.25rem;
     border-radius: 4px;
+    z-index: 1; /* Ensure actions are above the fade gradient */
+  }
+
+  .action-group {
+    display: flex;
+    gap: 0.25rem;
   }
 
   .quest-item:hover .quest-actions {
