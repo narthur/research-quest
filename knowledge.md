@@ -21,6 +21,13 @@ The plugin uses several strategies to generate high-quality research questions:
 - Prioritize questions that connect concepts or challenge assumptions
 - Look for methodological questions and potential contradictions
 
+Question Style:
+- Keep under 15 words
+- Focus on single concepts
+- Avoid compound questions
+- Eliminate redundant words
+- Must be answerable with available information
+
 ### Quest Management
 
 - Each quest is associated with a specific document

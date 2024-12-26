@@ -14,7 +14,7 @@
 <div class="quest-section">
   <div class="section-header">
     <h4>{title}</h4>
-    {#if showCopyButton}
+    {#if showCopyButton && quests.length > 0}
       <button
         class="copy-button"
         on:click={onCopy}
@@ -26,56 +26,61 @@
     {/if}
   </div>
   <div class="quest-list-content {type}">
-    {#each quests as quest}
-      <div 
-        class="quest-item {type} {quest.isParentQuestion ? 'parent-question' : ''} {quest.parentId ? 'sub-question' : ''}"
-        class:completed={type === 'completed'}
-        class:obsolete={type === 'obsolete'}
-      >
-        <div class="quest-content">
-          <span>{quest.question}</span>
-          {#if quest.isObsolete}
-            <div class="obsolete-badge" title={quest.obsoleteReason}>
-              Obsolete
+    {#if quests.length > 0}
+      {#each quests as quest}
+        <div 
+          class="quest-item {type} {quest.isParentQuestion ? 'parent-question' : ''} {quest.parentId ? 'sub-question' : ''}"
+          class:completed={type === 'completed'}
+          class:obsolete={type === 'obsolete'}
+        >
+          <div class="quest-content">
+            <span>{quest.question}</span>
+            {#if quest.isObsolete}
+              <div class="obsolete-badge" title={quest.obsoleteReason}>
+                Obsolete
+              </div>
+            {/if}
+          </div>
+          {#if type === "active" || type === "obsolete"}
+            <div class="quest-actions">
+              {#if type === "active" && onBreakdown}
+                <button
+                  class="action-button"
+                  on:click={() => onBreakdown(quest)}
+                  aria-label="Break down into sub-questions"
+                  title="Break down into sub-questions"
+                >
+                  ↳
+                </button>
+              {/if}
+              {#if type === "obsolete" && onRegenerate}
+                <button
+                  class="action-button"
+                  on:click={() => onRegenerate(quest)}
+                  aria-label="Regenerate question"
+                  title="Regenerate question"
+                >
+                  🔄
+                </button>
+              {/if}
+              <button
+                class="dismiss-button"
+                on:click={() => onDismiss(quest.id)}
+                aria-label="Dismiss question"
+              >
+                ✕
+              </button>
             </div>
           {/if}
         </div>
-        {#if type === "active" || type === "obsolete"}
-          <div class="quest-actions">
-            {#if type === "active" && onBreakdown}
-              <button
-                class="action-button"
-                on:click={() => onBreakdown(quest)}
-                aria-label="Break down into sub-questions"
-                title="Break down into sub-questions"
-              >
-                ↳
-              </button>
-            {/if}
-            {#if type === "obsolete" && onRegenerate}
-              <button
-                class="action-button"
-                on:click={() => onRegenerate(quest)}
-                aria-label="Regenerate question"
-                title="Regenerate question"
-              >
-                🔄
-              </button>
-            {/if}
-            <button
-              class="dismiss-button"
-              on:click={() => onDismiss(quest.id)}
-              aria-label="Dismiss question"
-            >
-              ✕
-            </button>
-          </div>
-        {/if}
-      </div>
-    {/each}
-    {#if quests.length === 0}
+      {/each}
+    {:else if type === "active"}
       <div class="empty-state">
-        <p class="empty-text">No {type} questions</p>
+        <p class="empty-text">Click refresh to generate research questions for this document</p>
+      </div>
+    {:else if type === "obsolete"}
+      <div class="empty-state">
+        <p class="empty-text">No questions need review</p>
       </div>
     {/if}
   </div>
@@ -200,6 +205,8 @@
     font-style: italic;
     background-color: var(--background-secondary);
     border-radius: 4px;
+    position: relative;  /* Instead of absolute */
+    margin: 0.5rem 0;
   }
 
   .empty-text {
