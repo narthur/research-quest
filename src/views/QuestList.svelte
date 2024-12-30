@@ -47,10 +47,17 @@
       loadQuests();
     });
 
+    // Listen for API key changes
+    const handleApiKeyChange = () => {
+      hasOpenAIKey = !!plugin.openai;
+    };
+    plugin.events.on("api-key-changed", handleApiKeyChange);
+
     return () => {
       // Clean up event listeners
       plugin.events.off("data-updated", loadQuests);
       plugin.events.off("active-leaf-changed", loadQuests);
+      plugin.events.off("api-key-changed", handleApiKeyChange);
     };
   });
 
@@ -76,7 +83,7 @@
       const fileContent = await plugin.app.vault.read(activeFile);
       const subQuestions = await plugin.openai.breakdownQuestion(
         fileContent,
-        quest.question
+        quest.question,
       );
 
       // Create new quests for sub-questions
@@ -166,7 +173,7 @@
       const fileContent = await plugin.app.vault.read(activeFile);
       const newQuestions = await plugin.openai.generateQuestions(
         fileContent,
-        1
+        1,
       );
 
       if (newQuestions.length === 0) return;

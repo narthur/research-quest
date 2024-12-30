@@ -17,12 +17,18 @@
 
   async function saveSettings() {
     if (plugin.settings) {
+      const hadApiKey = !!plugin.settings.OPENAI_API_KEY;
       plugin.settings.OPENAI_API_KEY = apiKey;
       plugin.settings.MODEL = model;
       plugin.settings.GENERATE_PROMPT = generatePrompt;
       plugin.settings.EVALUATE_PROMPT = evaluatePrompt;
       plugin.settings.BREAKDOWN_PROMPT = breakdownPrompt;
       await plugin.saveSettings();
+      
+      // Emit event if API key status changed
+      if (hadApiKey !== !!apiKey) {
+        plugin.events.emit('api-key-changed', !!apiKey);
+      }
     }
   }
 
