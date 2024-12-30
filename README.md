@@ -37,3 +37,17 @@ pnpm run build
 # Run tests
 pnpm test
 ```
+
+### Installing local plugin
+
+To install the plugin locally, you'll need to symlink the plugin folder to your Obsidian vault's plugins folder.
+
+```bash
+ln -s /path/to/research-quest /path/to/obsidian-vault/.obsidian/plugins/research-quest
+```
+
+Once you've created the symlink, you can enable the plugin in Obsidian's community plugins settings.
+
+To avoid needing to re-enable the plugin after each change, you can install the [hot-reload](https://github.com/pjeby/hot-reload) Obsidian plugin.
+
+[Further reading](https://docs.obsidian.md/Plugins/Getting+started/Build+a+plugin)
