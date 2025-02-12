@@ -237,10 +237,12 @@ describe("refreshQuests", () => {
     const initialQuestions = ["Q1"];
     mockPlugin.openai.generateQuestions.mockResolvedValueOnce(initialQuestions);
     mockPlugin.storage.getQuests.mockResolvedValueOnce([]);
-    mockPlugin.storage.saveQuests.mockImplementation(async (quests) => {
-      console.log("saveQuests called with:", quests);
-      return quests;
-    });
+    mockPlugin.storage.saveQuests.mockImplementation(
+      async (quests: unknown) => {
+        console.log("saveQuests called with:", quests);
+        return quests;
+      }
+    );
 
     console.log("Running refreshQuests");
     await refreshQuests(mockPlugin);
