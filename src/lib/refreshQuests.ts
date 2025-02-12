@@ -2,7 +2,55 @@ import type ResearchQuest from "..";
 import type { Quest } from "../services/storage";
 import { extractContext } from "./extractContext";
 import { generateContextHash } from "./generateContextHash";
-import { validateQuestions } from "./validateQuestions";
+
+async function evaluateExistingQuests(
+  plugin: ResearchQuest,
+  fileContent: string,
+  quests: Quest[],
+  activeFilePath: string
+): Promise<Quest[]> {
+  const activeQuests = quests.filter(q => q.documentId === activeFilePath && !q.isCompleted && !q.isDismissed);
+  if (activeQuests.length === 0) return quests;
+  
+  const evaluations = await plugin.openai.evaluateQuestions(
+    fileContent,
+    activeQuests.map(q => ({ id: q.id, question: q.question }))
+  );
+  
+  return quests.map(q => {
+    const evaluation = evaluations.evaluations.find(e => e.questionId === q.id);
+    if (evaluation?.isAnswered) {
+      return { ...q, isCompleted: true, completedAt: Date.now() };
+    }
+    return q;
+  });
+}
+
+async function generateNewQuests(
+  plugin: ResearchQuest,
+  fileContent: string,
+  activeFilePath: string,
+  count: number
+): Promise<Quest[]> {
+  const newQuestions = await plugin.openai.generateQuestions(fileContent, count);
+  const newQuests = await Promise.all(newQuestions.map(async question => {
+    const contextSnapshot = extractContext(fileContent, question);
+    const contextHash = await generateContextHash(fileContent);
+    return {
+      id: crypto.randomUUID(),
+      question,
+      isCompleted: false,
+      isDismissed: false,
+      createdAt: Date.now(),
+      documentId: activeFilePath,
+      documentPath: activeFilePath,
+      contextHash,
+      contextSnapshot,
+      lastValidated: Date.now(),
+    };
+  }));
+  return newQuests;
+}
 
 export default async function refreshQuests(plugin: ResearchQuest) {
   if (!plugin.openai) {
@@ -11,101 +59,35 @@ export default async function refreshQuests(plugin: ResearchQuest) {
   }
 
   const activeFile = plugin.app.workspace.getActiveFile();
-  if (!activeFile) {
-    return;
-  }
-
+  if (!activeFile) return;
+  
   try {
     const fileContent = await plugin.app.vault.read(activeFile);
     const quests = await plugin.storage.getQuests();
-    const currentQuests = quests.filter(
-      (q) => q.documentId === activeFile.path
-    );
-    const currentActiveQuests = currentQuests.filter(
-      (q) => !q.isCompleted && !q.isDismissed
-    );
-
-    // Validate existing questions
-    const validatedQuests = await validateQuestions(
-      plugin,
-      quests,
-      fileContent
-    );
-
-    // First evaluate existing quests
-    if (currentActiveQuests.length > 0) {
-      const evaluations = await plugin.openai.evaluateQuestions(
-        fileContent,
-        currentActiveQuests.map((q) => ({ id: q.id, question: q.question }))
-      );
-
-      // Update quest completion status based on evaluations
-      const updatedQuests = validatedQuests.map((quest) => {
-        const evaluation = evaluations.evaluations.find(
-          (e) => e.questionId === quest.id
-        );
-        if (evaluation?.isAnswered) {
-          return {
-            ...quest,
-            isCompleted: true,
-            completedAt: Date.now(),
-          };
-        }
-        return quest;
-      });
-
-      // Calculate how many new quests we need after evaluations
-      const remainingActiveQuests = updatedQuests.filter(
-        (q) =>
-          !q.isCompleted && !q.isDismissed && q.documentId === activeFile.path
-      );
-      const numQuestsNeeded = 5 - remainingActiveQuests.length;
-
-      if (numQuestsNeeded > 0) {
-        // Generate new questions in a single batch
-        const newQuestions = await plugin.openai.generateQuestions(
-          fileContent,
-          numQuestsNeeded
-        );
-        const newQuests: Quest[] = newQuestions.map((question) => {
-          const contextSnapshot = extractContext(fileContent, question);
-          return {
-            id: crypto.randomUUID(),
-            question,
-            isCompleted: false,
-            isDismissed: false,
-            createdAt: Date.now(),
-            documentId: activeFile.path,
-            documentPath: activeFile.path,
-            contextHash: generateContextHash(fileContent),
-            contextSnapshot,
-            lastValidated: Date.now(),
-          };
-        });
-
-        // Save everything in one operation
-        await plugin.storage.saveQuests([...updatedQuests, ...newQuests]);
-      } else {
-        // Just save the updated completion statuses
-        await plugin.storage.saveQuests(updatedQuests);
-      }
-    } else {
-      // No existing quests, just generate 5 new ones
-      const newQuestions = await plugin.openai.generateQuestions(
-        fileContent,
-        5
-      );
-      const newQuests: Quest[] = newQuestions.map((question) => ({
-        id: crypto.randomUUID(),
-        question,
-        isCompleted: false,
-        isDismissed: false,
-        createdAt: Date.now(),
-        documentId: activeFile.path,
-        documentPath: activeFile.path,
-      }));
-
+    const activeFilePath = activeFile.path;
+    const currentQuests = quests.filter(q => q.documentId === activeFilePath);
+    const currentActiveQuests = currentQuests.filter(q => !q.isCompleted && !q.isDismissed);
+    
+    // If no active quests at all, generate initial set
+    if (currentActiveQuests.length === 0) {
+      const newQuests = await generateNewQuests(plugin, fileContent, activeFilePath, 5);
       await plugin.storage.saveQuests([...quests, ...newQuests]);
+      return;
+    }
+    
+    // Phase 1: Evaluation
+    const evaluatedQuests = await evaluateExistingQuests(plugin, fileContent, quests, activeFilePath);
+    await plugin.storage.saveQuests(evaluatedQuests);
+    
+    // Phase 2: Generation if needed
+    const remainingActive = evaluatedQuests.filter(q =>
+      q.documentId === activeFilePath && !q.isCompleted && !q.isDismissed
+    );
+    
+    if (remainingActive.length < 5) {
+      const countNeeded = 5 - remainingActive.length;
+      const newQuests = await generateNewQuests(plugin, fileContent, activeFilePath, countNeeded);
+      await plugin.storage.saveQuests([...evaluatedQuests, ...newQuests]);
     }
   } catch (error) {
     console.error("Error refreshing quests:", error);

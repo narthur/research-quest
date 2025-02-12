@@ -45,6 +45,7 @@ An Obsidian plugin that helps users deepen their research by generating intellig
 - Mock external services in tests
 - Test error cases and edge conditions
 - Ensure proper cleanup in tests
+- Run a single test for better debugging: `pnpm dlx vitest run -t "should follow the basic flow" src/lib/refreshQuests.spec.ts`
 
 ## Resources
 

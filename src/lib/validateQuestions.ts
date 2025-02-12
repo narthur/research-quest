@@ -7,7 +7,7 @@ export async function validateQuestions(
   quests: Quest[],
   fileContent: string
 ): Promise<Quest[]> {
-  const currentHash = generateContextHash(fileContent);
+  const currentHash = await generateContextHash(fileContent);
 
   return quests.map((quest) => {
     if (!quest.contextHash || !quest.contextSnapshot) return quest;

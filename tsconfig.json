@@ -1,7 +1,9 @@
 {
   "extends": "@tsconfig/svelte/tsconfig.json",
   "compilerOptions": {
-    "types": ["svelte", "node"]
+    "types": ["svelte"],
+    "module": "esnext",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"]
   },
   "exclude": ["node_modules/*", "__sapper__/*", "dist/*", "main.js"]
 }
