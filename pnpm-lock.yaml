@@ -7,10 +7,6 @@ settings:
 importers:
 
   .:
-    dependencies:
-      uuid:
-        specifier: ^11.0.5
-        version: 11.0.5
     devDependencies:
       '@eslint/js':
         specifier: ^9.17.0
@@ -60,6 +56,9 @@ importers:
       typescript-eslint:
         specifier: ^8.18.2
         version: 8.18.2(eslint@9.17.0)(typescript@5.7.2)
+      uuid:
+        specifier: ^11.0.5
+        version: 11.0.5
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.2)
