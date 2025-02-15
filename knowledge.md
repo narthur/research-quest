@@ -38,6 +38,7 @@ An Obsidian plugin that helps users deepen their research by generating intellig
 - Follow Obsidian's UI patterns and styles
 - Keep components focused and single-purpose
 - Use Svelte for UI components
+- [Conform to Obsidian's plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines)
 
 ## Testing
 
