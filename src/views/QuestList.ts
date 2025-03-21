@@ -18,7 +18,7 @@ export class QuestList extends ItemView {
   }
 
   getDisplayText() {
-    return "Quest List";
+    return "Quest list";
   }
 
   getIcon() {

@@ -89,7 +89,7 @@
 
 <div class="setting-item">
   <div class="setting-item-info">
-    <div class="setting-item-name">OpenAI API Key</div>
+    <div class="setting-item-name">OpenAI API key</div>
     <div class="setting-item-description">
       Enter your OpenAI API key to enable AI features
     </div>
@@ -106,7 +106,7 @@
 
 <div class="setting-item">
   <div class="setting-item-info">
-    <div class="setting-item-name">Generate Questions Prompt</div>
+    <div class="setting-item-name">Generate questions prompt</div>
     <div class="setting-item-description">
       System prompt for generating research questions
     </div>
@@ -123,7 +123,7 @@
 
 <div class="setting-item">
   <div class="setting-item-info">
-    <div class="setting-item-name">Evaluate Questions Prompt</div>
+    <div class="setting-item-name">Evaluate questions prompt</div>
     <div class="setting-item-description">
       System prompt for evaluating if questions are answered
     </div>
@@ -140,7 +140,7 @@
 
 <div class="setting-item">
   <div class="setting-item-info">
-    <div class="setting-item-name">Breakdown Questions Prompt</div>
+    <div class="setting-item-name">Breakdown questions prompt</div>
     <div class="setting-item-description">
       System prompt for breaking down questions into sub-questions
     </div>
@@ -174,24 +174,24 @@
 
 <div class="setting-item">
   <div class="setting-item-info">
-    <div class="setting-item-name">Reset Settings</div>
+    <div class="setting-item-name">Reset settings</div>
     <div class="setting-item-description">
       Reset all settings to defaults (except API key)
     </div>
   </div>
   <div class="setting-item-control">
-    <button on:click={resetToDefaults}>Reset to Defaults</button>
+    <button on:click={resetToDefaults}>Reset to defaults</button>
   </div>
 </div>
 
 <div class="setting-item">
   <div class="setting-item-info">
-    <div class="setting-item-name">Clear Data</div>
+    <div class="setting-item-name">Clear data</div>
     <div class="setting-item-description">
       Remove all research quests. This action cannot be undone.
     </div>
   </div>
   <div class="setting-item-control">
-    <button on:click={clearData}> Clear All Data </button>
+    <button on:click={clearData}> Clear all data </button>
   </div>
 </div>

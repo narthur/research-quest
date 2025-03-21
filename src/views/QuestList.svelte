@@ -215,14 +215,14 @@
           openSettings();
         }}
       >
-        Open Settings
+        Open settings
       </button>
     </div>
   {/if}
 
   {#if obsoleteQuests.length > 0}
     <div class="quest-section">
-      <h4>Needs Review</h4>
+      <h4>Needs review</h4>
       <div class="quest-list-content obsolete">
         {#each obsoleteQuests as quest}
           <div class="quest-item obsolete">
@@ -257,7 +257,7 @@
 
   <div class="quest-list-header">
     <div class="header-left">
-      <h3>Research Questions</h3>
+      <h3>Research questions</h3>
       <button
         class="settings-button"
         on:click={() => {
@@ -299,7 +299,7 @@
 
   <div class="quest-section">
     <div class="section-header">
-      <h4>Active Quests</h4>
+      <h4>Active quests</h4>
       {#if hasActiveQuests}
         <button
           class="copy-button"
@@ -342,7 +342,7 @@
   </div>
 
   <div class="quest-section">
-    <h4>Completed Quests</h4>
+    <h4>Completed quests</h4>
     <div class="quest-list-content completed">
       {#each completedQuests as quest}
         <div class="quest-item completed">
