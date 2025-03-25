@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { StorageService } from "./index";
-import type { Quest } from "./index";
 
 describe("StorageService", () => {
   const mockPlugin: any = {
@@ -63,7 +62,7 @@ describe("StorageService", () => {
         },
       ];
       mockPlugin.loadData.mockResolvedValue({ quests: mockQuests });
-      
+
       const doc1Quests = await storage.getQuestsForDocument("doc1.md");
       expect(doc1Quests).toHaveLength(1);
       expect(doc1Quests[0].documentId).toBe("doc1.md");
@@ -82,7 +81,7 @@ describe("StorageService", () => {
         },
       ];
       mockPlugin.loadData.mockResolvedValue({ quests: mockQuests });
-      
+
       const doc2Quests = await storage.getQuestsForDocument("doc2.md");
       expect(doc2Quests).toEqual([]);
     });
@@ -101,9 +100,9 @@ describe("StorageService", () => {
           documentPath: "test.md",
         },
       ];
-      
+
       await storage.saveQuests(questsToSave);
-      
+
       expect(mockPlugin.saveData).toHaveBeenCalledWith({
         quests: questsToSave,
       });
@@ -115,7 +114,7 @@ describe("StorageService", () => {
         quests: [],
       };
       mockPlugin.loadData.mockResolvedValue(existingData);
-      
+
       const questsToSave = [
         {
           id: "1",
@@ -127,9 +126,9 @@ describe("StorageService", () => {
           documentPath: "test.md",
         },
       ];
-      
+
       await storage.saveQuests(questsToSave);
-      
+
       expect(mockPlugin.saveData).toHaveBeenCalledWith({
         someOtherKey: "value",
         quests: questsToSave,

@@ -16,15 +16,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Use Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18.x"
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: latest
+      - name: Install asdf & tools
+        uses: asdf-vm/actions/install@v3
 
       - name: Build plugin
         run: |
@@ -39,5 +32,5 @@ jobs:
 
           gh release create "$tag" \
             --title="$tag" \
-            --draft \
+            --generate-notes \
             main.js manifest.json

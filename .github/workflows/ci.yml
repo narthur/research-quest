@@ -1,0 +1,112 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v3
+
+      - name: Checkout main
+        uses: actions/checkout@v3
+        with:
+          ref: main
+          path: main
+
+      - name: Compare versions
+        run: |
+          PR_VERSION=$(jq -r '.version' manifest.json)
+          MAIN_VERSION=$(jq -r '.version' main/manifest.json)
+          
+          if [ "$PR_VERSION" = "$MAIN_VERSION" ]; then
+            echo "Error: Version in manifest.json has not been updated"
+            echo "Main version: $MAIN_VERSION"
+            echo "PR version: $PR_VERSION"
+            exit 1
+          fi
+          
+          echo "Version has been updated from $MAIN_VERSION to $PR_VERSION"
+
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install asdf & tools
+        uses: asdf-vm/actions/install@v3
+      - name: Install dependencies
+        run: pnpm install
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+          key: ${{ runner.os }}-deps-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+  lint:
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install asdf & tools
+        uses: asdf-vm/actions/install@v3
+      - name: Restore cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+          key: ${{ runner.os }}-deps-${{ hashFiles('**/pnpm-lock.yaml') }}
+      - name: Run ESLint
+        run: pnpm run lint
+
+  typescript:
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install asdf & tools
+        uses: asdf-vm/actions/install@v3
+      - name: Restore cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+          key: ${{ runner.os }}-deps-${{ hashFiles('**/pnpm-lock.yaml') }}
+      - name: Check TypeScript
+        run: pnpm run checkTs
+
+  test:
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install asdf & tools
+        uses: asdf-vm/actions/install@v3
+      - name: Restore cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+          key: ${{ runner.os }}-deps-${{ hashFiles('**/pnpm-lock.yaml') }}
+      - name: Run tests
+        run: pnpm run test -- --run
+
+  build:
+    needs: [lint, typescript, test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install asdf & tools
+        uses: asdf-vm/actions/install@v3
+      - name: Restore cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+          key: ${{ runner.os }}-deps-${{ hashFiles('**/pnpm-lock.yaml') }}
+      - name: Build
+        run: pnpm run build
