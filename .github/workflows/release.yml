@@ -29,7 +29,7 @@ jobs:
         run: |
           VERSION=$(jq -r '.version' manifest.json)
 
-          gh release create "v$VERSION" \
-            --title="v$VERSION" \
+          gh release create "$VERSION" \
+            --title="$VERSION" \
             --generate-notes \
             main.js manifest.json
