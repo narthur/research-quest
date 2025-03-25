@@ -27,9 +27,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          tag="${GITHUB_REF#refs/tags/}"
+          VERSION=$(jq -r '.version' manifest.json)
 
-          gh release create "$tag" \
-            --title="$tag" \
+          gh release create "v$VERSION" \
+            --title="v$VERSION" \
             --generate-notes \
             main.js manifest.json
